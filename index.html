@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Special You — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#B5175E;--pink2:#E91E63;--pink-l:#FCE4EC;--pink-m:#F8BBD0;
+  --gold:#E8960C;--gold-l:#FFF8E1;
+  --green:#1B7C3A;--green-l:#E8F5E9;
+  --purple:#6A1B9A;--purp-l:#F3E5F5;
+  --red:#C62828;--red-l:#FFEBEE;
+  --orange:#D84315;--ora-l:#FBE9E7;
+  --blue:#1565C0;--blue-l:#E3F2FD;
+  --ink:#1A1A2E;--ink2:#4A4A6A;--ink3:#9090AA;
+  --bg:#FDF0F6;--surf:#fff;--bdr:#EDE0F0;
+  --nav:68px;--hdr:56px;
+  --safe:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink)}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;z-index:9999;background:linear-gradient(150deg,#6A1B9A 0%,#B5175E 50%,#E91E63 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.login-box{background:rgba(255,255,255,.97);border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.login-logo{width:52px;height:52px;background:linear-gradient(135deg,#B5175E,#E91E63);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.login-title{text-align:center;font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.login-sub{text-align:center;font-size:13px;color:var(--ink3);margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{font-size:12px;font-weight:700;color:var(--ink2);display:block;margin-bottom:5px}
+.field input{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:12px;font-size:14px;font-family:inherit;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--pink)}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#B5175E,#E91E63);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px;transition:opacity .2s}
+.login-btn:active{opacity:.85}
+.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+
+/* ── APP SHELL ── */
+#mainApp{display:none;height:100%;flex-direction:column}
+#mainApp.show{display:flex}
+
+/* Header */
+#hdr{height:var(--hdr);background:linear-gradient(135deg,#B5175E,#E91E63);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;box-shadow:0 2px 12px rgba(181,23,94,.3)}
+.hdr-logo{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hdr-info{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:800;color:#fff}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.75);font-weight:500}
+.hdr-live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;cursor:pointer;border:none;font-family:inherit;color:#fff;font-size:11px;font-weight:700}
+.live-dot{width:7px;height:7px;background:#4CAF50;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hdr-ava{width:34px;height:34px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0;position:relative}
+
+/* Scroll area */
+#scrollArea{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 14px calc(var(--nav) + var(--safe) + 16px);scrollbar-width:none}
+#scrollArea::-webkit-scrollbar{display:none}
+
+/* Pages */
+.page{display:none}.page.active{display:block}
+
+/* Bottom Nav */
+#nav{height:var(--nav);background:#fff;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-around;padding-bottom:var(--safe);flex-shrink:0;position:relative;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;cursor:pointer;border:none;background:none;font-family:inherit;position:relative;transition:all .2s}
+.ni-ic{font-size:22px;line-height:1}
+.ni-lb{font-size:10px;font-weight:600;color:var(--ink3);transition:color .2s}
+.ni.active .ni-lb{color:var(--pink);font-weight:800}
+.ni-badge{position:absolute;top:4px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:9px;font-weight:800;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;display:none}
+.ni-badge.show{display:block}
+
+/* Drawer */
+#drawerBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;backdrop-filter:blur(2px)}
+#drawerBg.show{display:block}
+#drawer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:24px 24px 0 0;z-index:201;padding:16px 16px calc(var(--safe)+16px);transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+#drawer.show{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 16px}
+.di{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;cursor:pointer;transition:background .15s;margin-bottom:4px}
+.di:active{background:var(--bg)}
+.di-ic{font-size:22px;width:40px;height:40px;background:var(--bg);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.di-lb{font-size:14px;font-weight:700;color:var(--ink)}
+.di-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+
+/* User modal */
+#userModal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:80px 16px 0;backdrop-filter:blur(3px)}
+#userModal.show{display:flex}
+.um-box{background:#fff;border-radius:20px;width:100%;max-width:360px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.um-head{background:linear-gradient(135deg,#B5175E,#E91E63);padding:20px;display:flex;align-items:center;gap:12px}
+.um-ava{width:48px;height:48px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff}
+.um-name{font-size:16px;font-weight:800;color:#fff}
+.um-role{font-size:12px;color:rgba(255,255,255,.75)}
+.um-body{padding:16px}
+.um-btn{width:100%;padding:12px;border-radius:12px;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:opacity .2s}
+.um-logout{background:var(--red-l);color:var(--red)}
+.um-close{background:var(--bg);color:var(--ink2)}
+
+/* Cards */
+.card{background:var(--surf);border-radius:16px;padding:14px;margin-bottom:10px;border:1px solid var(--bdr)}
+.card-t{font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.sec-t{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--ink);margin:14px 0 8px}
+.sec-dot{width:8px;height:8px;background:var(--pink);border-radius:2px;flex-shrink:0}
+.cwt{height:200px;position:relative}
+.cwtl{height:240px;position:relative}
+
+/* KPI grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.mc{background:var(--surf);border-radius:16px;padding:13px 12px;border:1px solid var(--bdr)}
+.mc.pink{background:var(--pink-l);border-color:var(--pink-m)}
+.mc.gold{background:var(--gold-l);border-color:#FFE082}
+.mc.green{background:var(--green-l);border-color:#A5D6A7}
+.mc.red{background:var(--red-l);border-color:#EF9A9A}
+.mc-ic{font-size:20px;margin-bottom:4px}
+.mc-val{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--ink);line-height:1}
+.mc-lbl{font-size:11px;font-weight:700;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.mc-sub{font-size:10px;margin-top:2px}
+
+/* Filter bar */
+.fbar{background:var(--surf);border-radius:14px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--bdr)}
+.fbar-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fbar-row+.fbar-row{margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)}
+.fbar-lbl{font-size:11px;font-weight:700;color:var(--ink3);white-space:nowrap}
+.fsel{padding:6px 10px;border-radius:9px;border:1.5px solid var(--bdr);font-size:12px;font-weight:600;font-family:inherit;background:#fff;color:var(--ink);outline:none;flex:1;min-width:80px;max-width:140px}
+.fsel:focus{border-color:var(--pink)}
+
+/* Progress bars */
+.pr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pn{width:88px;font-size:11px;font-weight:600;color:var(--ink2);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb{flex:1;background:var(--bg);border-radius:5px;height:8px;overflow:hidden}
+.pf{height:100%;border-radius:5px;transition:width .5s ease}
+.pv{width:58px;text-align:right;font-size:11px;font-weight:700;color:var(--pink);flex-shrink:0;font-family:'DM Mono',monospace}
+
+/* Table */
+.tw{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--pink);color:#fff;padding:8px 10px;text-align:left;font-weight:700;white-space:nowrap}
+thead th:first-child{border-radius:8px 0 0 0}
+thead th:last-child{border-radius:0 8px 0 0}
+tbody tr:nth-child(even){background:var(--pink-l)}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.b-pink{background:var(--pink-l);color:var(--pink)}
+.b-gold{background:var(--gold-l);color:var(--gold)}
+.b-green{background:var(--green-l);color:var(--green)}
+.b-purple{background:var(--purp-l);color:var(--purple)}
+.b-red{background:var(--red-l);color:var(--red)}
+.b-orange{background:var(--ora-l);color:var(--orange)}
+.b-blue{background:var(--blue-l);color:var(--blue)}
+.b-gray{background:var(--bg);color:var(--ink3)}
+
+/* Alert items */
+.ai{display:flex;align-items:center;gap:10px;background:var(--surf);border-radius:13px;padding:11px 13px;margin-bottom:8px;border:1.5px solid var(--bdr)}
+.ai.red{border-color:#EF9A9A;background:var(--red-l)}
+.ai.orange{border-color:#FFCC80;background:var(--ora-l)}
+.ai.yellow{border-color:#FFE082;background:var(--gold-l)}
+.a-name{font-size:13px;font-weight:700;color:var(--ink)}
+.a-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.dp{text-align:center;flex-shrink:0}
+.dn{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.dl{font-size:9px;color:var(--ink3);font-weight:600;text-transform:uppercase}
+
+/* Info card */
+.ic{border-radius:12px;padding:11px 13px;margin-bottom:8px;font-size:12px;line-height:1.6;border-left:4px solid}
+.ic.green{background:var(--green-l);border-color:var(--green);color:#1b5e20}
+.ic.yellow{background:var(--gold-l);border-color:var(--gold);color:#4e342e}
+.ic.pink{background:var(--pink-l);border-color:var(--pink);color:#880e4f}
+.ic.blue{background:var(--blue-l);border-color:var(--blue);color:#0d47a1}
+
+/* SKU viewer */
+.sku-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.fchip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--bdr);font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:var(--ink2);transition:all .18s;white-space:nowrap}
+.fchip.active{background:var(--pink);border-color:var(--pink);color:#fff}
+.fchip.bau.active{background:var(--green);border-color:var(--green)}
+.fchip.temp.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.seg-wrap{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.seg-wrap::-webkit-scrollbar{display:none}
+.sch{padding:5px 12px;border-radius:20px;border:1.5px solid var(--bdr);font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--ink2);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.sch.active{background:var(--pink-l);border-color:var(--pink);color:var(--pink)}
+.srch-wrap{position:relative;margin-bottom:10px}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.srch{width:100%;padding:10px 14px 10px 38px;border-radius:12px;border:1.5px solid var(--bdr);font-size:13px;font-family:inherit;outline:none;background:#fff}
+.srch:focus{border-color:var(--pink)}
+.sku-cnt{font-size:12px;color:var(--ink3);font-weight:600;margin-bottom:8px}
+.sku-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:12px;border:1px solid var(--bdr);margin-bottom:7px}
+.sku-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sku-main{flex:1;min-width:0}
+.sku-code{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sku-seg{font-size:11px;color:var(--ink3);margin-top:2px}
+.sku-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.sku-ean{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace}
+.no-res{text-align:center;padding:40px 20px;color:var(--ink3)}
+.no-res-ic{font-size:40px;margin-bottom:10px}
+
+/* Brand bars */
+.br-row{margin-bottom:12px}
+.br-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.br-nm{font-weight:700;font-size:13px}
+.br-vl{font-size:13px;font-weight:800;font-family:'DM Mono',monospace}
+.br-bar{background:var(--bg);border-radius:5px;height:8px;overflow:hidden}
+.br-fi{height:100%;border-radius:5px;transition:width .5s}
+.br-pc{font-size:11px;color:var(--ink3);margin-top:2px}
+
+/* Pipeline */
+.pipe-c{background:#fff;border-radius:14px;padding:12px;margin-bottom:8px;border:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:flex-start;gap:9px}
+.pipe-nm{font-weight:700;font-size:13px}
+.pipe-mt{font-size:11px;color:var(--ink3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* Reports */
+.rep-stat{background:#fff;border-radius:14px;padding:13px;border:1px solid var(--bdr);margin-bottom:9px}
+.rs-lbl{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px}
+.rs-val{font-size:26px;font-weight:800;font-family:'DM Mono',monospace;color:var(--ink);margin:4px 0}
+.rs-sub{font-size:12px;color:var(--ink3)}
+
+/* Rank */
+.rk{width:24px;height:24px;border-radius:50%;background:var(--pink);color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.r1{background:linear-gradient(135deg,#FFD700,#FFA000);color:#4e2c00}
+.r2{background:linear-gradient(135deg,#C0C0C0,#9E9E9E);color:#2c2c2c}
+.r3{background:linear-gradient(135deg,#CD7F32,#8D6E63);color:#fff}
+
+/* QC grid */
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qc{background:#fff;border-radius:12px;padding:11px;border:1px solid var(--bdr);text-align:center}
+.qv{font-size:18px;font-weight:800;color:var(--pink);font-family:'DM Mono',monospace}
+.ql{font-size:10px;font-weight:600;color:var(--ink3);margin-top:2px}
+
+/* Date bar */
+.dbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:9px 12px;background:var(--surf);border-radius:12px;border:1px solid var(--bdr)}
+.dbar-l{font-size:12px;font-weight:700;color:var(--ink2)}
+
+/* Home hero */
+.hero{background:linear-gradient(135deg,#B5175E,#E91E63);border-radius:20px;padding:20px;margin-bottom:10px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-30px;right:20px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%}
+.hero-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.hero-val{font-size:38px;font-weight:800;color:#fff;font-family:'DM Mono',monospace;line-height:1}
+.hero-sub{font-size:12px;color:rgba(255,255,255,.8);margin-top:6px;display:flex;align-items:center;gap:8px}
+.hero-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-weight:700}
+
+/* Toast */
+#toast{position:fixed;top:calc(var(--hdr)+10px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--ink);color:#fff;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Setup */
+.setup-step{display:flex;gap:12px;background:#fff;border-radius:13px;padding:12px;margin-bottom:9px;border:1px solid var(--bdr)}
+.s-num{width:27px;height:27px;border-radius:50%;background:var(--pink);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s-body{font-size:13px;line-height:1.6;color:var(--ink2)}
+.s-body strong{color:var(--pink)}
+.code-block{background:#1A1A2E;color:#69F0AE;border-radius:10px;padding:12px 14px;font-family:'DM Mono',monospace;font-size:11px;margin:9px 0;overflow-x:auto;line-height:1.8;white-space:pre}
+
+/* ── SEGMENT INTELLIGENCE ── */
+.seg-card{background:#fff;border-radius:16px;border:1.5px solid var(--bdr);padding:14px;margin-bottom:10px}
+.seg-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.seg-card-title{font-size:13px;font-weight:800;color:var(--ink)}
+.seg-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.seg-item:last-child{border-bottom:none;padding-bottom:0}
+.seg-item-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.seg-item-body{flex:1;min-width:0}
+.seg-item-name{font-size:13px;font-weight:700;color:var(--ink)}
+.seg-item-desc{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.seg-item-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.pi-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.pi-tabs::-webkit-scrollbar{display:none}
+.pi-tab{padding:7px 16px;border-radius:20px;border:1.5px solid var(--bdr);font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:var(--ink2);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.pi-tab.active{background:var(--pink);border-color:var(--pink);color:#fff}
+
+/* ── IMPROVEMENT TRACKER ── */
+.imp-card{background:#fff;border-radius:16px;border:1.5px solid var(--bdr);padding:14px;margin-bottom:9px}
+.imp-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.imp-title{font-size:13px;font-weight:800;color:var(--ink);flex:1}
+.imp-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.imp-progress{margin-top:8px}
+.imp-bar-row{display:flex;align-items:center;gap:8px}
+.imp-bar-bg{flex:1;background:var(--bg);border-radius:5px;height:7px;overflow:hidden}
+.imp-bar-fi{height:100%;border-radius:5px;transition:width .6s ease}
+.imp-pct{font-size:11px;font-weight:800;font-family:'DM Mono',monospace;color:var(--pink);width:36px;text-align:right;flex-shrink:0}
+.imp-deadline{font-size:11px;color:var(--ink3);margin-top:5px;display:flex;align-items:center;gap:4px}
+.imp-desc{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:6px;padding:8px;background:var(--bg);border-radius:8px}
+.stage-bar{display:flex;border-radius:12px;overflow:hidden;height:32px;margin-bottom:10px}
+.stage-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:flex .4s}
+.imp-stage-pills{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+.isp{text-align:center;padding:10px 16px;border-radius:12px;flex:1}
+.isp-val{font-size:22px;font-weight:800;font-family:'DM Mono',monospace}
+.isp-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+
+/* ── CUSTOMER & MARKETING ── */
+.cm-card{background:#fff;border-radius:16px;border:1.5px solid var(--bdr);padding:14px;margin-bottom:9px}
+.cm-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.fb-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.fb-item:last-child{border-bottom:none;padding-bottom:0}
+.fb-stars{color:#FFB300;font-size:13px;letter-spacing:1px}
+.fb-text{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:3px}
+.fb-meta{font-size:10px;color:var(--ink3);margin-top:3px}
+.mkt-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.mkt-row:last-child{border-bottom:none;padding-bottom:0}
+.mkt-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mkt-body{flex:1}
+.mkt-title{font-size:13px;font-weight:700;color:var(--ink)}
+.mkt-desc{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.mkt-status{display:flex;align-items:center;gap:6px;margin-top:5px}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">✨</div>
+    <div class="login-title">Special You</div>
+    <div class="login-sub">Dashboard · Let Your Heart Speak</div>
+    <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="lErr"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+  <!-- Header -->
+  <div id="hdr">
+    <div class="hdr-logo">✨</div>
+    <div class="hdr-info">
+      <div class="hdr-title">Special You</div>
+      <div class="hdr-sub" id="hdrSub">Dashboard</div>
+    </div>
+    <button class="hdr-live" onclick="refreshAll()"><span class="live-dot"></span><span id="liveLabel">LIVE</span></button>
+    <div class="hdr-ava" onclick="openUserModal()" id="userAva">S</div>
+  </div>
+
+  <!-- Scroll Area -->
+  <div id="scrollArea">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-lbl" id="heroLbl">Latest Month — Total Sales</div>
+        <div class="hero-val" id="heroVal">—</div>
+        <div class="hero-sub">
+          <span>Growth: <span id="heroGrowth" style="font-weight:800">—</span>%</span>
+          <span class="hero-badge">🗓️ <span id="heroNext">—</span></span>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="mc pink"><div class="mc-ic">🚨</div><div class="mc-val" id="urgentCnt">0</div><div class="mc-lbl">Urgent</div></div>
+        <div class="mc gold"><div class="mc-ic">📦</div><div class="mc-val" id="homePlats">0</div><div class="mc-lbl">Platforms</div></div>
+        <div class="mc green"><div class="mc-ic">🗂️</div><div class="mc-val" id="homeSKUs">0</div><div class="mc-lbl">SKUs</div></div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div>Upcoming Alerts</div>
+      <div id="homeAlerts"></div>
+      <div class="sec-t"><div class="sec-dot"></div>Sales Trend</div>
+      <div class="card"><div class="cwt"><canvas id="trendChart"></canvas></div></div>
+      <div class="sec-t"><div class="sec-dot"></div>Brand Overview</div>
+      <div class="card"><div class="cwt"><canvas id="brandHomeChart"></canvas></div></div>
+    </div>
+
+    <!-- PLATFORMS -->
+    <div class="page" id="page-platforms">
+      <div class="fbar">
+        <div class="fbar-row">
+          <span class="fbar-lbl">Year:</span>
+          <select class="fsel" id="platYear" onchange="renderPlatforms()"><option>All Years</option></select>
+          <span class="fbar-lbl">Month:</span>
+          <select class="fsel" id="platMonth" onchange="renderPlatforms()"><option>All Months</option></select>
+        </div>
+        <div class="fbar-row">
+          <span class="fbar-lbl">Compare:</span>
+          <select class="fsel" id="platCmpA" onchange="renderPlatforms()"><option value="">—</option></select>
+          <span class="fbar-lbl">vs</span>
+          <select class="fsel" id="platCmpB" onchange="renderPlatforms()"><option value="">—</option></select>
+        </div>
+      </div>
+      <div class="g2" id="platKpis"></div>
+      <div class="card"><div class="card-t" id="platBarsTitle">Units Sold — Ranked</div><div id="platBars"></div></div>
+      <div class="card"><div class="card-t" id="platChartTitle">Comparison Chart</div><div class="cwt"><canvas id="platChart"></canvas></div></div>
+      <div class="sec-t"><div class="sec-dot"></div>Quick Commerce</div>
+      <div class="qg" id="qcGrid"></div>
+      <div class="card" style="margin-top:10px"><div class="card-t">All Platforms — All Periods</div><div class="tw"><table id="platTable"></table></div></div>
+    </div>
+
+    <!-- OCCASIONS -->
+    <div class="page" id="page-occasions">
+      <div class="dbar"><span class="dbar-l" id="occDate">—</span><span style="font-size:10px;color:var(--ink3)">Auto-calculated daily</span></div>
+      <div class="sec-t"><div class="sec-dot"></div>Action Required</div>
+      <div id="allAlerts"></div>
+      <div class="sec-t"><div class="sec-dot"></div>Full Calendar</div>
+      <div class="card"><div class="tw"><table id="occTable"></table></div></div>
+    </div>
+
+    <!-- CATALOG -->
+    <div class="page" id="page-catalog">
+      <div class="sec-t"><div class="sec-dot"></div>SKU Catalog Viewer</div>
+      <div class="sku-filters">
+        <div class="fchip active" onclick="setTypeF('all',this)">All SKUs</div>
+        <div class="fchip bau" onclick="setTypeF('BAU',this)">✅ BAU</div>
+        <div class="fchip temp" onclick="setTypeF('TEMP',this)">🌸 Seasonal</div>
+      </div>
+      <div class="seg-wrap" id="segWrap"></div>
+      <div class="srch-wrap"><span class="srch-ic">🔍</span><input class="srch" id="skuSrch" placeholder="Search SKU, segment, EAN..." oninput="renderCatalog()"></div>
+      <div class="sku-cnt" id="skuCnt">—</div>
+      <div id="skuList"></div>
+    </div>
+
+    <!-- BRANDS -->
+    <div class="page" id="page-brands">
+      <div class="fbar">
+        <div class="fbar-row">
+          <span class="fbar-lbl">Year:</span>
+          <select class="fsel" id="brandYear" onchange="renderBrands()"><option>All Years</option></select>
+          <span class="fbar-lbl">Month:</span>
+          <select class="fsel" id="brandMonth" onchange="renderBrands()"><option>All Months</option></select>
+        </div>
+        <div class="fbar-row">
+          <span class="fbar-lbl">Compare:</span>
+          <select class="fsel" id="brandCmpA" onchange="renderBrands()"><option value="">—</option></select>
+          <span class="fbar-lbl">vs</span>
+          <select class="fsel" id="brandCmpB" onchange="renderBrands()"><option value="">—</option></select>
+        </div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div><span id="brandTitle">Brand Performance</span></div>
+      <div class="card"><div class="cwt"><canvas id="brandChart"></canvas></div></div>
+      <div class="card"><div id="brandBars"></div></div>
+      <div class="card"><div class="card-t">Brand Summary — All Periods</div><div class="tw"><table id="brandTable"></table></div></div>
+    </div>
+
+    <!-- TOP SKUs -->
+    <div class="page" id="page-skuperf">
+      <div class="fbar">
+        <div class="fbar-row">
+          <span class="fbar-lbl">Year:</span>
+          <select class="fsel" id="skuYear" onchange="renderSkuPerf()"><option>All Years</option></select>
+          <span class="fbar-lbl">Month:</span>
+          <select class="fsel" id="skuMonth" onchange="renderSkuPerf()"><option>All Months</option></select>
+          <span class="fbar-lbl">Show:</span>
+          <select class="fsel" id="skuTopN" onchange="renderSkuPerf()"><option value="10">Top 10</option><option value="20">Top 20</option><option value="50">Top 50</option></select>
+        </div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div><span id="skuPerfTitle">Top SKUs</span></div>
+      <div class="card"><div class="cwtl"><canvas id="skuChart"></canvas></div></div>
+      <div class="card"><div class="tw"><table id="skuTable"></table></div></div>
+    </div>
+
+
+    <!-- PAGE: SEGMENT INTELLIGENCE -->
+    <div class="page" id="page-segint">
+      <div class="g2">
+        <div class="mc pink"><div class="mc-ic">🔴</div><div class="mc-val" id="siUrgent">—</div><div class="mc-lbl">Urgent Gaps</div></div>
+        <div class="mc gold"><div class="mc-ic">📊</div><div class="mc-val" id="siTotal">—</div><div class="mc-lbl">Total Segments</div></div>
+      </div>
+      <div class="pi-tabs">
+        <div class="pi-tab active" onclick="setSiTab('bau',this)">✅ BAU Gaps</div>
+        <div class="pi-tab" onclick="setSiTab('temp',this)">🌸 TEMP/Seasonal</div>
+      </div>
+      <div id="siContent"></div>
+    </div>
+
+    <!-- PAGE: PRODUCT IMPROVEMENT -->
+    <div class="page" id="page-improve">
+      <div class="imp-stage-pills">
+        <div class="isp" id="impTabPlan" style="background:var(--gold-l);cursor:pointer;border:2px solid var(--gold)" onclick="setImpTab('Plan')">
+          <div class="isp-val" id="impPlan" style="color:var(--gold)">—</div>
+          <div class="isp-lbl" style="color:var(--gold)">📋 Plan</div>
+        </div>
+        <div class="isp" id="impTabDev" style="background:var(--blue-l);cursor:pointer;border:2px solid transparent" onclick="setImpTab('In Development')">
+          <div class="isp-val" id="impDev" style="color:var(--blue)">—</div>
+          <div class="isp-lbl" style="color:var(--blue)">🔧 In Dev</div>
+        </div>
+        <div class="isp" id="impTabClose" style="background:var(--green-l);cursor:pointer;border:2px solid transparent" onclick="setImpTab('Closure')">
+          <div class="isp-val" id="impClose" style="color:var(--green)">—</div>
+          <div class="isp-lbl" style="color:var(--green)">✅ Done</div>
+        </div>
+      </div>
+      <div class="stage-bar" id="impStageBar"></div>
+      <div class="sec-t"><div class="sec-dot"></div><span id="impListTitle">Plan Stage</span></div>
+      <div id="impList"></div>
+    </div>
+
+    <!-- PAGE: CUSTOMER & MARKETING -->
+    <div class="page" id="page-cx">
+      <div class="g3">
+        <div class="mc green"><div class="mc-ic">⭐</div><div class="mc-val" id="cxAvg">—</div><div class="mc-lbl">Avg Rating</div></div>
+        <div class="mc pink"><div class="mc-ic">💬</div><div class="mc-val" id="cxFb">—</div><div class="mc-lbl">Feedbacks</div></div>
+        <div class="mc gold"><div class="mc-ic">📣</div><div class="mc-val" id="cxMkt">—</div><div class="mc-lbl">Campaigns</div></div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div>Customer Feedback</div>
+      <div class="cm-card" id="cxFbList"></div>
+      <div class="sec-t"><div class="sec-dot"></div>Marketing Activities</div>
+      <div id="cxMktList"></div>
+      <div class="sec-t"><div class="sec-dot"></div>Rating Distribution</div>
+      <div class="card"><div class="cwt"><canvas id="cxRatingChart"></canvas></div></div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="page" id="page-pipeline">
+      <div class="g3">
+        <div class="mc gold" style="text-align:center"><div class="mc-val" id="pIdea" style="color:var(--gold)">—</div><div class="mc-lbl">Idea</div></div>
+        <div class="mc" style="text-align:center"><div class="mc-val" id="pDesign">—</div><div class="mc-lbl">Design</div></div>
+        <div class="mc green" style="text-align:center"><div class="mc-val" id="pLaunch" style="color:var(--green)">—</div><div class="mc-lbl">Launch</div></div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div>All Pipeline Products</div>
+      <div id="pipelineList"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="sec-t"><div class="sec-dot"></div>Sales Summary</div>
+      <div class="g2">
+        <div class="rep-stat"><div class="rs-lbl" id="rPrevLbl">Prev Month</div><div class="rs-val" id="rPrev">—</div><div class="rs-sub">Units sold</div></div>
+        <div class="rep-stat"><div class="rs-lbl" id="rCurLbl">Latest Month</div><div class="rs-val" id="rCur">—</div><div class="rs-sub">Units sold</div></div>
+        <div class="rep-stat"><div class="rs-lbl">MoM Growth</div><div class="rs-val" id="rGrowth" style="color:var(--green)">—</div><div class="rs-sub">vs previous month</div></div>
+        <div class="rep-stat"><div class="rs-lbl">Top Platform</div><div class="rs-val" id="rTop" style="font-size:16px">—</div><div class="rs-sub">Latest month</div></div>
+      </div>
+      <div class="sec-t"><div class="sec-dot"></div>Monthly Trend</div>
+      <div class="card"><div class="cwt"><canvas id="repTrend"></canvas></div></div>
+      <div class="sec-t"><div class="sec-dot"></div>Platform Share — Latest Month</div>
+      <div class="card"><div class="cwt"><canvas id="repPie"></canvas></div></div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="page" id="page-setup">
+      <div class="ic pink"><strong>🔗 Live Connected</strong> — Dashboard fetches data from Google Sheets via Apps Script automatically.</div>
+      <div class="sec-t"><div class="sec-dot"></div>Connection Details</div>
+      <div class="setup-step"><div class="s-num">✅</div><div class="s-body">Apps Script URL connected: <strong>AKfycbz5Y8Gd...</strong></div></div>
+      <div class="setup-step"><div class="s-num">🔄</div><div class="s-body">Press <strong>LIVE button</strong> in header to refresh data anytime. Auto-refresh every 5 minutes.</div></div>
+      <div class="setup-step"><div class="s-num">📊</div><div class="s-body">To add new data: open Google Sheet → add rows to Platform Sales / Brand Sales / SKU Sales → press 🔄</div></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="sec-t"><div class="sec-dot"></div>Manage Users</div>
+      <div id="userListEl"></div>
+      <div class="card">
+        <div class="card-t">Add New User</div>
+        <div class="field"><label>Name</label><input class="srch" style="padding:10px 14px" id="newName" placeholder="Full name"></div>
+        <div class="field" style="margin-top:8px"><label>Email</label><input class="srch" style="padding:10px 14px" id="newEmail" placeholder="email@example.com"></div>
+        <div class="field" style="margin-top:8px"><label>Password</label><input class="srch" style="padding:10px 14px" id="newPass" placeholder="Password"></div>
+        <div class="field" style="margin-top:8px"><label>Role</label>
+          <select class="fsel" id="newRole" style="max-width:100%;width:100%"><option>Admin</option><option>Manager</option><option>Viewer</option></select>
+        </div>
+        <button class="login-btn" style="margin-top:10px" onclick="addUser()">Add User</button>
+      </div>
+    </div>
+
+  </div><!-- /scrollArea -->
+
+  <!-- Bottom Nav -->
+  <div id="nav">
+    <button class="ni active" id="ni-home" onclick="goPage('home',this)">
+      <span class="ni-ic">🏠</span><span class="ni-lb">Home</span>
+    </button>
+    <button class="ni" id="ni-platforms" onclick="goPage('platforms',this)">
+      <span class="ni-ic">📱</span><span class="ni-lb">Platforms</span>
+    </button>
+    <button class="ni" id="ni-occasions" onclick="goPage('occasions',this)">
+      <span class="ni-ic">🗓️</span><span class="ni-lb">Occasions</span>
+      <span class="ni-badge" id="occBadge">0</span>
+    </button>
+    <button class="ni" id="ni-catalog" onclick="goPage('catalog',this)">
+      <span class="ni-ic">📦</span><span class="ni-lb">Catalog</span>
+    </button>
+    <button class="ni" id="ni-more" onclick="openDrawer()">
+      <span class="ni-ic">☰</span><span class="ni-lb">More</span>
+    </button>
+  </div>
+</div><!-- /mainApp -->
+
+<!-- Drawer -->
+<div id="drawerBg" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-handle"></div>
+  <div class="di" onclick="goPage('segint',null);closeDrawer()"><div class="di-ic">🧩</div><div><div class="di-lb">Segment Intelligence</div><div style="font-size:11px;color:var(--ink3)">Gaps & opportunities</div></div></div>
+  <div class="di" onclick="goPage('improve',null);closeDrawer()"><div class="di-ic">🔧</div><div><div class="di-lb">Product Improvement</div><div style="font-size:11px;color:var(--ink3)">Fix tracker & progress</div></div></div>
+  <div class="di" onclick="goPage('cx',null);closeDrawer()"><div class="di-ic">💬</div><div><div class="di-lb">Customer & Marketing</div><div style="font-size:11px;color:var(--ink3)">Feedback & campaigns</div></div></div>
+  <div class="di" onclick="goPage('brands',null);closeDrawer()"><div class="di-ic">🏷️</div><div><div class="di-lb">Brands</div><div style="font-size:11px;color:var(--ink3)">Sales by brand</div></div></div>
+  <div class="di" onclick="goPage('skuperf',null);closeDrawer()"><div class="di-ic">📈</div><div><div class="di-lb">Top SKUs</div><div style="font-size:11px;color:var(--ink3)">Best performers</div></div></div>
+  <div class="di" onclick="goPage('pipeline',null);closeDrawer()"><div class="di-ic">💡</div><div><div class="di-lb">Pipeline</div><div style="font-size:11px;color:var(--ink3)">New products</div></div></div>
+  <div class="di" onclick="goPage('reports',null);closeDrawer()"><div class="di-ic">📊</div><div><div class="di-lb">Reports</div><div style="font-size:11px;color:var(--ink3)">Key insights</div></div></div>
+  <div class="di" onclick="goPage('setup',null);closeDrawer()"><div class="di-ic">🔗</div><div><div class="di-lb">Setup</div><div style="font-size:11px;color:var(--ink3)">Connection info</div></div></div>
+  <div class="di" onclick="goPage('users',null);closeDrawer()"><div class="di-ic">👥</div><div><div class="di-lb">Users</div><div style="font-size:11px;color:var(--ink3)">Manage access</div></div></div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal">
+  <div class="um-box">
+    <div class="um-head">
+      <div class="um-ava" id="umAva">S</div>
+      <div><div class="um-name" id="umName">—</div><div class="um-role" id="umRole">—</div></div>
+    </div>
+    <div class="um-body">
+      <button class="um-btn um-logout" onclick="doLogout()">Sign Out</button>
+      <button class="um-btn um-close" onclick="closeUserModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">—</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_Gu_78a9g9A6stEcS-d2GK9eD0gUQ4dAhNPcMqlamKCE-rib15qHEHqpNYYjTohs6/exec";
+
+const BC = ["#B5175E","#E8960C","#1B7C3A","#6A1B9A","#1565C0","#D84315","#00838F","#558B2F","#4527A0","#AD1457"];
+const BRAND_COLORS = {specialyou:"#B5175E",gogear:"#E8960C",bohofy:"#1B7C3A",supavitra:"#6A1B9A"};
+const ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+// ══════════════════════════════════════════════════
+// RAW DATA (sample — overwritten by live fetch)
+// ══════════════════════════════════════════════════
+const RAW = {
+  platRows:[
+    {year:2025,month:"Dec",platform:"Amazon",qty:9309},
+    {year:2025,month:"Dec",platform:"Flipkart",qty:4842},
+    {year:2025,month:"Dec",platform:"First Cry",qty:247},
+    {year:2025,month:"Dec",platform:"Nykaa",qty:137},
+    {year:2025,month:"Dec",platform:"Tata Cliq",qty:29},
+    {year:2025,month:"Dec",platform:"Shopify",qty:22},
+    {year:2025,month:"Dec",platform:"Jiomart",qty:31},
+    {year:2026,month:"Jan",platform:"Amazon",qty:8277},
+    {year:2026,month:"Jan",platform:"Flipkart",qty:4040},
+    {year:2026,month:"Jan",platform:"First Cry",qty:434},
+    {year:2026,month:"Jan",platform:"Nykaa",qty:59},
+    {year:2026,month:"Jan",platform:"Tata Cliq",qty:9},
+    {year:2026,month:"Jan",platform:"Zepto",qty:34191},
+    {year:2026,month:"Jan",platform:"Blinkit",qty:2670},
+    {year:2026,month:"Jan",platform:"Instamart",qty:13124},
+    {year:2026,month:"Jan",platform:"Myntra",qty:1043},
+    {year:2026,month:"Jan",platform:"Amazon.com",qty:64},
+  ],
+  brandRows:[
+    {year:2026,month:"Jan",brand:"SpecialYou",qty:33333,c:"#B5175E"},
+    {year:2026,month:"Jan",brand:"GoGear",qty:22222,c:"#E8960C"},
+    {year:2026,month:"Jan",brand:"Bohofy",qty:11111,c:"#1B7C3A"},
+    {year:2026,month:"Jan",brand:"Supavitra",qty:5555,c:"#6A1B9A"},
+  ],
+  skuRows:[
+    {year:2026,month:"Jan",sku:"Sy-MediumKite-Light-4",qty:8758,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-TriHairclip-6",qty:4855,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-SadaThread",qty:2505,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-CartoonKite-4",qty:2489,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-SolidFoilKite-4",qty:2362,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"TB-JPZR-L64L",qty:2122,seg:"Birthday Decor"},
+    {year:2026,month:"Jan",sku:"Sy-IndiaWristBand-5",qty:1924,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-Reel-Charkhi",qty:1813,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-Kite-Mirchi",qty:1708,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"Sy-TriBangles-2",qty:1560,seg:"Party Supplies"},
+    {year:2026,month:"Jan",sku:"U6-VFI6-0OBD",qty:1404,seg:"Birthday Decor"},
+    {year:2026,month:"Jan",sku:"Sy-BlackGoldHBD-35-SI",qty:1308,seg:"Birthday Decor"},
+  ],
+  occ:[
+    {n:"New Year",d:"2026-01-01",type:"Big"},{n:"Lohri",d:"2026-01-13",type:"Big"},
+    {n:"Makar Sankranti",d:"2026-01-14",type:"Big"},{n:"Republic Day",d:"2026-01-26",type:"Big"},
+    {n:"Valentine's Day",d:"2026-02-14",type:"Big"},{n:"Holi",d:"2026-03-04",type:"Big"},
+    {n:"Eid ul-Fitr",d:"2026-03-21",type:"Big"},{n:"Ram Navami",d:"2026-03-26",type:"Big"},
+    {n:"Easter Day",d:"2026-04-01",type:"Big"},{n:"Mother's Day",d:"2026-05-10",type:"Small"},
+    {n:"Eid (Bakrid)",d:"2026-05-26",type:"Small"},{n:"Pride Month",d:"2026-06-01",type:"Small"},
+    {n:"Father's Day",d:"2026-06-21",type:"Small"},{n:"Muharram",d:"2026-06-26",type:"Small"},
+    {n:"Guru Purnima",d:"2026-07-07",type:"Small"},{n:"Friendship Day",d:"2026-08-02",type:"Small"},
+    {n:"Independence Day",d:"2026-08-15",type:"Small"},{n:"Raksha Bandhan",d:"2026-08-28",type:"Big"},
+    {n:"Janmashtami",d:"2026-09-04",type:"Big"},{n:"Ganesh Chaturthi",d:"2026-09-14",type:"Big"},
+    {n:"Diwali",d:"2026-11-07",type:"Big"},{n:"Christmas",d:"2026-12-25",type:"Big"},
+  ],
+  catalog:[
+    {sku:"F6-CI49-FB7G",seg:"Birthday Decor",type:"BAU",ean:"X001Q22J1R"},
+    {sku:"Sy-18thpink&white-63",seg:"Birthday Decor",type:"BAU",ean:"X001Y4SCAJ"},
+    {sku:"HBD-BLCKWHTE-SLVRSTR",seg:"Birthday Decor",type:"BAU",ean:"X001PQCCFR"},
+    {sku:"SY-60thBirthday-70",seg:"Birthday Decor",type:"BAU",ean:"X001Y1G8RB"},
+    {sku:"SY-AVENGERS-71",seg:"Birthday Decor",type:"BAU",ean:"X001TBAMQJ"},
+    {sku:"SY-NarutoBday-52",seg:"Birthday Decor",type:"BAU",ean:"X001XQMTYD"},
+    {sku:"SY-PEPPAPIG",seg:"Birthday Decor",type:"BAU",ean:"X001VUOJXZ"},
+    {sku:"SY-BLUEY-53",seg:"Birthday Decor",type:"BAU",ean:"X001W3RSEX"},
+    {sku:"Sy-PastelBday-57",seg:"Birthday Decor",type:"BAU",ean:"X00206EZID"},
+    {sku:"Sy-RosegoldBday-51",seg:"Birthday Decor",type:"BAU",ean:"X00206CXT1"},
+    {sku:"WDNG-BRIDTOB-MROONNET",seg:"BTB Decor",type:"BAU",ean:"X001MZHFFN"},
+    {sku:"SY-BrideToBeGames-64",seg:"BTB Decor",type:"BAU",ean:"X0020UZFAV"},
+    {sku:"Sy-BrideToBe-59",seg:"BTB Decor",type:"BAU",ean:"X00273R0BN"},
+    {sku:"SY-BabyPhotoFrameKit-Blue",seg:"Gifting",type:"BAU",ean:"X0025GB1QR"},
+    {sku:"SY-BabyPhotoFrameKit-Pink",seg:"Gifting",type:"BAU",ean:"X0025GB1Q7"},
+    {sku:"Sy-paperbag-10",seg:"Gifting",type:"BAU",ean:"X0022MSAXV"},
+    {sku:"SY-BrownWelcome-73",seg:"Welcome Decor",type:"BAU",ean:"X0020EE8Y1"},
+    {sku:"SY-WelcomeDoor-33",seg:"Welcome Decor",type:"BAU",ean:"X0020MTDXT"},
+    {sku:"Sy-Yellow&Greenmehendi",seg:"Wedding Decor",type:"BAU",ean:"X001WUSBO7"},
+    {sku:"Sy-RectangularStand-01",seg:"Party Supplies",type:"BAU",ean:"X0025U90ED"},
+    {sku:"SY-ElectricPump-1",seg:"Party Supplies",type:"BAU",ean:"X00263DVVR"},
+    {sku:"SP-Pink-LotusSticker-10",seg:"Wall Decor",type:"BAU",ean:"X00254UVVF"},
+    {sku:"OK-F64H-Z92Q",seg:"Home Decor",type:"BAU",ean:"X001PJNN2Z"},
+    {sku:"Sy-Artificialvines-7",seg:"Home Decor",type:"BAU",ean:"X001UJKATJ"},
+    {sku:"Sy-m2bheadbandsash-2",seg:"Baby Shower",type:"BAU",ean:"X0020H39IJ"},
+    {sku:"YN-DZYJ-56LO",seg:"Anniversary Decor",type:"BAU",ean:"X001R5933P"},
+    {sku:"Sy-PaperKandil-1",seg:"Diwali Decor",type:"TEMP",ean:"X0024YPW7J"},
+    {sku:"SY-DeepakHanging-10",seg:"Diwali Decor",type:"TEMP",ean:"X0024Y1QPL"},
+    {sku:"SY-HangingStar-Red-1",seg:"Christmas Decor",type:"TEMP",ean:"X00265XNR7"},
+    {sku:"SY-LovePastel-63",seg:"Valentine Day Decor",type:"TEMP",ean:"X001XWY70V"},
+    {sku:"SY-RedHeartDecor-40",seg:"Valentine Day Decor",type:"TEMP",ean:"X001Y37KW1"},
+    {sku:"SY-NewYearHanging-10",seg:"New Year Decor",type:"TEMP",ean:"X0026DS4U5"},
+    {sku:"Sy-rakshabandhan-18",seg:"Raksha Bandhan",type:"TEMP",ean:""},
+    {sku:"Sy-MotherdayRose-23",seg:"Mother's Day",type:"TEMP",ean:""},
+    {sku:"SY-HoliColors-Premium",seg:"Holi Items",type:"TEMP",ean:""},
+    {sku:"SY-GaneshMurti-Small",seg:"Ganesh Chaturthi Decor",type:"TEMP",ean:""},
+  ],
+
+  segIntel:{
+    bau:[
+      {name:"Rakhi Special Combo Kits",reason:"Trending heavily on Amazon/Flipkart; competitors like Chotta Bheem store doing 3x sales",demand:"High",competitors:"Hallmark, Archies, Chotta Bheem",tags:["Gifting","Seasonal BAU"],ic:"🪢",priority:"🔴 Urgent"},
+      {name:"Luxury Wedding Welcome Kit",reason:"Customers repeatedly requesting premium unboxing experience; currently no player owns this space",demand:"High",competitors:"The Knot India, WedMeGood",tags:["Wedding Decor","BAU"],ic:"💍",priority:"🔴 Urgent"},
+      {name:"Photo Wall / Memory Wall Kit",reason:"High search volume 'photo wall decor' — Miniso & Chumbak dominating; we have no SKU",demand:"Very High",competitors:"Miniso, Chumbak, Hobbytree",tags:["Home Decor","BAU"],ic:"🖼️",priority:"🟠 Soon"},
+      {name:"Personalised Name Banners",reason:"Custom name banners are top-requested in customer reviews across all party decor brands",demand:"Very High",competitors:"Zazzle, Printland, Bigsmall",tags:["Birthday Decor","BAU"],ic:"🎀",priority:"🟠 Soon"},
+      {name:"Neon Sign Alternatives (LED Flex)",reason:"Neon signs are viral on Instagram — affordable LED flex not available under ₹500 on platforms",demand:"High",competitors:"Smiledecor, Neonshyne",tags:["Home Decor","BAU"],ic:"✨",priority:"🟡 Plan"},
+      {name:"Kids Room Decor Bundle",reason:"Category exploding on Meesho & Flipkart; no single brand has a complete kit under ₹799",demand:"Medium",competitors:"Meesho sellers, Flipkart private label",tags:["Home Decor","BAU"],ic:"🧸",priority:"🟡 Plan"},
+    ],
+    temp:[
+      {name:"Karwa Chauth Thali Decor Kit",reason:"Zero organized players; Google Trends shows 4x spike every Oct; currently only local bazaar sells",demand:"Very High",competitors:"Local vendors only",tags:["Karwa Chauth","TEMP"],ic:"🌕",priority:"🔴 Urgent"},
+      {name:"Navratri Dandiya + Decor Bundle",reason:"High search volume; Flipkart Navratri category growing 60% YoY; no premium kit available",demand:"High",competitors:"Local, Amazon basics",tags:["Navratri","TEMP"],ic:"🪘",priority:"🔴 Urgent"},
+      {name:"Baisakhi / Harvest Festival Kit",reason:"North India market underserved; no brand owns Baisakhi decor online yet",demand:"Medium",competitors:"None",tags:["Regional","TEMP"],ic:"🌾",priority:"🟠 Soon"},
+      {name:"Eid Mubarak Premium Decor",reason:"Muslim celebration decor completely absent from our catalog; Eid has 3+ crore buyers online",demand:"High",competitors:"Archies, FNP",tags:["Eid","TEMP"],ic:"🌙",priority:"🟠 Soon"},
+      {name:"Pongal / Makar Sankranti Kit",reason:"South India expansion — Pongal decor has near-zero competition in organized sector",demand:"Medium",competitors:"Regional only",tags:["South India","TEMP"],ic:"🪔",priority:"🟡 Plan"},
+      {name:"Christmas Stocking + Advent Set",reason:"Urban Christmas market growing 35% YoY; premium kits under ₹999 have zero competition",demand:"Medium",competitors:"Hallmark, Spencer's",tags:["Christmas","TEMP"],ic:"🎄",priority:"🟡 Plan"},
+    ]
+  },
+  improvements:[
+    {id:1,sku:"Sy-MediumKite-Light-4",issue:"Packaging tears during shipping — 12% return rate on Amazon",stage:"In Development",pct:60,deadline:"2026-03-31",brief:"Reinforce inner packaging with bubble wrap insert",detail:"Returns analysis shows kite frame punctures poly bag. Solution: double-layer corrugated insert + fragile sticker. Vendor: Pakka India. Estimated cost increase: ₹3/unit. Expected return rate drop: 12% → 3%.",platform:"Amazon",priority:"🔴 High"},
+    {id:2,sku:"SY-AVENGERS-71",issue:"Colors fading reported in 8% reviews",stage:"Plan",pct:15,deadline:"2026-04-15",brief:"Switch to UV-resistant ink printing vendor",detail:"23 reviews mention color fading within 2 weeks. Current vendor: PrintMax Delhi. Proposed vendor: ColorFast Noida (UV coating +₹5/unit). Need sample approval from Cherry.",platform:"Flipkart",priority:"🔴 High"},
+    {id:3,sku:"Sy-PaperKandil-1",issue:"Assembly instructions unclear — customer complaints",stage:"Closure",pct:90,deadline:"2026-03-15",brief:"New QR code instruction card added to packaging",detail:"New instruction card with QR code linking to YouTube tutorial designed and sent to vendor. Production batch of 500 units with new card ordered. Expected ship: 15 March. Review monitoring set up.",platform:"All",priority:"🟠 Medium"},
+    {id:4,sku:"Sy-TriHairclip-6",issue:"Clip mechanism breaks after 3-4 uses",stage:"In Development",pct:45,deadline:"2026-04-30",brief:"Upgrade clip material from ABS to nylon",detail:"Material testing in progress with 3 vendors. Nylon clips cost ₹1.5 extra per unit but 5x durability. Cherry approved material change. Sheetal coordinating with vendor. Target: new batch by end April.",platform:"Amazon, Flipkart",priority:"🟠 Medium"},
+    {id:5,sku:"Sy-RectangularStand-01",issue:"Stand wobbles on uneven surfaces",stage:"Plan",pct:10,deadline:"2026-05-15",brief:"Add rubber feet to base of stand",detail:"Simple fix: 4 rubber anti-slip pads (₹0.80/unit) to be added to base. Design approved. Pending vendor confirmation for next production run.",platform:"Amazon",priority:"🟡 Low"},
+  ],
+  cx:{
+    feedback:[
+      {stars:5,text:"Loved the kite set! My kids had so much fun on Makar Sankranti. Packaging was beautiful.",platform:"Amazon",sku:"Sy-MediumKite-Light-4",date:"Jan 2026"},
+      {stars:2,text:"Box arrived crushed. Product inside was fine but first impression was bad.",platform:"Flipkart",sku:"Multiple",date:"Jan 2026"},
+      {stars:5,text:"Best birthday decor I found online! Set up in 20 mins and looked amazing.",platform:"Amazon",sku:"Sy-PastelBday-57",date:"Jan 2026"},
+      {stars:3,text:"Quality is ok but the clip broke after 4 uses. Expected better for ₹299.",platform:"Amazon",sku:"Sy-TriHairclip-6",date:"Feb 2026"},
+      {stars:4,text:"Delivery was fast, product good. Would love more color options.",platform:"Zepto",sku:"Sy-SadaThread",date:"Jan 2026"},
+    ],
+    mkt:[
+      {ic:"📸",title:"Instagram Reels — Unboxing",desc:"Collab with 3 mom micro-influencers (10k–50k followers) for kite season unboxing. Estimated reach: 2L+",status:"Active",statusCls:"b-green",channel:"Instagram"},
+      {ic:"🎯",title:"Zepto Banner Ad — Holi",desc:"Run Holi product banner on Zepto homepage 7 days before Holi. Estimated impressions: 5L",status:"Planned",statusCls:"b-gold",channel:"Zepto"},
+      {ic:"📧",title:"Email — Post-Purchase Thank You",desc:"Automated thank-you email with product care tips + 10% next order coupon. Currently not active.",status:"Pending Setup",statusCls:"b-orange",channel:"Email/WhatsApp"},
+      {ic:"🌟",title:"Amazon A+ Content Upgrade",desc:"Upgrade 15 top SKUs to A+ content with lifestyle images. Estimated CTR improvement: +18%",status:"In Progress",statusCls:"b-blue",channel:"Amazon"},
+      {ic:"🎬",title:"YouTube — How to Decorate Videos",desc:"3 tutorial videos: Birthday, Wedding, Diwali. SEO-optimized. Estimated 50k views/month organic.",status:"Planned",statusCls:"b-gold",channel:"YouTube"},
+    ]
+  },
+
+  pipeline:[
+    {n:"Pearl Bow Banner",brand:"Special You",seg:"Home Decor",stage:"Idea",owner:"Sheetal"},
+    {n:"Dried Flower Bouquet w/ Neckpiece",brand:"Special You",seg:"Gifting",stage:"Idea",owner:"Sheetal"},
+    {n:"Small Crochet Single Flower",brand:"Special You",seg:"Gifting",stage:"Idea",owner:"Sheetal"},
+    {n:"Dried Flower Vase Bouquet",brand:"Special You",seg:"Gifting",stage:"Idea",owner:"Sheetal"},
+    {n:"Wall Decor MDF Frames v1",brand:"Supavitra",seg:"Home Decor",stage:"Idea",owner:"Cherry"},
+    {n:"Wall Decor MDF (Bohofy)",brand:"Bohofy",seg:"Home Decor",stage:"Idea",owner:"Cherry"},
+    {n:"Temple Experience Box",brand:"Supavitra",seg:"Gifting",stage:"Idea",owner:"Cherry"},
+  ],
+};
+
+// ══════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════
+// Passwords stored as simple hash (not plaintext)
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return String(h>>>0);}
+const DEFAULT_USERS = [
+  {id:1,name:"Sunny Singh",  email:"sunny@specialyou.in", pass:simpleHash("sunny123"), role:"Admin"},
+  {id:2,name:"Cherry Saxena",email:"cherry@specialyou.in",pass:simpleHash("cherry123"),role:"Admin"},
+  {id:3,name:"Sheetal",      email:"sheetal@specialyou.in",pass:simpleHash("sheetal123"),role:"Manager"},
+];
+function getUsers(){try{return JSON.parse(localStorage.getItem('sy_users'))||DEFAULT_USERS}catch(e){return DEFAULT_USERS}}
+function saveUsers(u){localStorage.setItem('sy_users',JSON.stringify(u))}
+function getSession(){try{return JSON.parse(sessionStorage.getItem('sy_sess'))}catch(e){return null}}
+function saveSession(u){sessionStorage.setItem('sy_sess',JSON.stringify(u))}
+function clearSession(){sessionStorage.removeItem('sy_sess')}
+
+function doLogin(){
+  const em=document.getElementById('lEmail').value.trim().toLowerCase();
+  const pw=document.getElementById('lPass').value;
+  const user=getUsers().find(u=>u.email.toLowerCase()===em&&u.pass===simpleHash(pw));
+  if(!user){document.getElementById('lErr').textContent='Invalid email or password';return}
+  saveSession(user);
+  startApp(user);
+  fetchLiveData();
+}
+
+function startApp(user){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainApp').classList.add('show');
+  document.getElementById('userAva').textContent=user.name.charAt(0).toUpperCase();
+  document.getElementById('umAva').textContent=user.name.charAt(0).toUpperCase();
+  document.getElementById('umName').textContent=user.name;
+  document.getElementById('umRole').textContent=user.role;
+  document.getElementById('hdrSub').textContent=user.role+' · Dashboard';
+  renderAll();
+}
+
+function doLogout(){
+  clearSession();
+  document.getElementById('mainApp').classList.remove('show');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('lEmail').value='';
+  document.getElementById('lPass').value='';
+  document.getElementById('lErr').textContent='';
+  closeUserModal();
+}
+
+function addUser(){
+  const n=document.getElementById('newName').value.trim();
+  const e=document.getElementById('newEmail').value.trim();
+  const p=document.getElementById('newPass').value.trim();
+  const r=document.getElementById('newRole').value;
+  if(!n||!e||!p){showToast('⚠️ Fill all fields');return}
+  const users=getUsers();
+  users.push({id:Date.now(),name:n,email:e,pass:simpleHash(p),role:r});
+  saveUsers(users);
+  document.getElementById('newName').value='';
+  document.getElementById('newEmail').value='';
+  document.getElementById('newPass').value='';
+  renderUsers();
+  showToast('✅ User added!');
+}
+
+function deleteUser(id){
+  const sess=getSession();
+  if(sess&&sess.id===id){showToast('⚠️ Cannot delete current user');return}
+  saveUsers(getUsers().filter(u=>u.id!==id));
+  renderUsers();
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+let curPage='home';
+const rendered=new Set();
+
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('scrollArea').scrollTop=0;
+  curPage=id;
+  if(!rendered.has(id)){
+    rendered.add(id);
+    if(id==='platforms') renderPlatforms();
+    else if(id==='occasions') renderOccasions();
+    else if(id==='catalog') renderCatalogInit();
+    else if(id==='brands') renderBrands();
+    else if(id==='skuperf') renderSkuPerf();
+    else if(id==='segint') renderSegInt();
+    else if(id==='improve') renderImprove();
+    else if(id==='cx') renderCX();
+    else if(id==='pipeline') renderPipeline();
+    else if(id==='reports') renderReports();
+    else if(id==='users') renderUsers();
+  }
+}
+
+function openDrawer(){document.getElementById('drawerBg').classList.add('show');document.getElementById('drawer').classList.add('show')}
+function closeDrawer(){document.getElementById('drawerBg').classList.remove('show');document.getElementById('drawer').classList.remove('show')}
+function openUserModal(){document.getElementById('userModal').classList.add('show')}
+function closeUserModal(){document.getElementById('userModal').classList.remove('show')}
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+const CH={};
+function mk(id,cfg){
+  if(CH[id]){CH[id].destroy();delete CH[id]}
+  const el=document.getElementById(id);
+  if(!el) return;
+  CH[id]=new Chart(el.getContext('2d'),cfg);
+}
+
+let _toastT=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  if(_toastT) clearTimeout(_toastT);
+  _toastT=setTimeout(()=>{t.classList.remove('show');_toastT=null;},2500);
+}
+
+function sortPeriods(arr){
+  return [...new Set(arr)].sort((a,b)=>{
+    const [ma,ya]=a.split(' ');const [mb,yb]=b.split(' ');
+    return ya!==yb?ya-yb:ORDER.indexOf(ma)-ORDER.indexOf(mb);
+  });
+}
+function getYears(rows){return [...new Set(rows.map(r=>String(r.year)))].sort((a,b)=>b-a)}
+function getMonths(rows){return [...new Set(rows.map(r=>r.month))].sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b))}
+function filterR(rows,y,m){
+  let r=rows;
+  if(y&&y!=='All Years') r=r.filter(x=>String(x.year)===y);
+  if(m&&m!=='All Months') r=r.filter(x=>x.month===m);
+  return r;
+}
+function sumBy(rows,key){
+  const m={};rows.forEach(r=>{m[r[key]]=(m[r[key]]||0)+r.qty});return m;
+}
+function fillSel(id,opts,val){
+  const el=document.getElementById(id);if(!el)return;
+  const cur=val||el.value;
+  el.innerHTML=opts.map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('');
+}
+function N(n){return Number(n).toLocaleString('en-IN')}
+
+function calcOcc(list){
+  const today=new Date();today.setHours(0,0,0,0);
+  return list.map(o=>{
+    const dt=new Date(o.d);
+    let days=Math.round((dt-today)/(1000*60*60*24));
+    if(days<0){dt.setFullYear(dt.getFullYear()+1);days=Math.round((dt-today)/(1000*60*60*24))}
+    const threshold=o.type==='Big'?90:45;
+    const cls=days<=15?'red':days<=30?'orange':days<=threshold?'yellow':'green';
+    const lbl=days<=15?'🔴 Act Now':days<=30?'🟠 Soon':days<=threshold?'🟡 Plan':'✅ OK';
+    const fmt=dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    return{...o,days,cls,lbl,fmt,dt};
+  }).sort((a,b)=>a.days-b.days);
+}
+
+// ══════════════════════════════════════════════════
+// LIVE FETCH
+// ══════════════════════════════════════════════════
+async function fetchSheet(key){
+  try{
+    const r=await fetch(APPS_SCRIPT_URL+'?sheet='+key+'&t='+Date.now(),{cache:'no-cache'});
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d.rows||null;
+  }catch(e){return null}
+}
+
+async function fetchLiveData(){
+  showToast('🔄 Fetching live data...');
+  try{
+    const [plat,brand,sku,occ,cat,pip]=await Promise.all([
+      fetchSheet('platform'),fetchSheet('brand'),fetchSheet('skus'),
+      fetchSheet('occasions'),fetchSheet('catalog'),fetchSheet('pipeline')
+    ]);
+
+    // Platform
+    if(plat&&plat.length){
+      const rows=plat.map(r=>{
+        const p=r['platform']||r['platform name']||'';if(!p)return null;
+        const m=r['month']||'';if(!m)return null;
+        const q=parseInt(r['total sales qty']||r['qty']||0)||0;
+        const y=parseInt(r['year']||0)||(m.toLowerCase().includes('dec')?2025:2026);
+        const mc=m.charAt(0).toUpperCase()+m.slice(1,3).toLowerCase();
+        return{year:y,month:mc,platform:p,qty:q};
+      }).filter(Boolean);
+      if(rows.length) RAW.platRows=rows;
+    }
+
+    // Brand
+    if(brand&&brand.length){
+      const rows=brand.map(r=>{
+        const b=r['brand name']||r['brand']||'';if(!b)return null;
+        const m=r['month']||'';if(!m)return null;
+        const q=parseInt(r['total sales qty']||r['qty']||0)||0;
+        const y=parseInt(r['year']||0)||2026;
+        const mc=m.charAt(0).toUpperCase()+m.slice(1,3).toLowerCase();
+        const c=BRAND_COLORS[b.toLowerCase().replace(/\s+/g,'')]||'#888';
+        return{year:y,month:mc,brand:b,qty:q,c};
+      }).filter(Boolean);
+      if(rows.length) RAW.brandRows=rows;
+    }
+
+    // SKU
+    if(sku&&sku.length){
+      const rows=sku.map(r=>{
+        const s=r['sku']||'';if(!s)return null;
+        const m=r['month']||'';if(!m)return null;
+        const q=parseInt(r['qty']||r['total sales qty']||0)||0;
+        const y=parseInt(r['year']||0)||2026;
+        const mc=m.charAt(0).toUpperCase()+m.slice(1,3).toLowerCase();
+        return{year:y,month:mc,sku:s,qty:q,seg:r['segment']||''};
+      }).filter(Boolean);
+      if(rows.length) RAW.skuRows=rows;
+    }
+
+    // Occasions
+    if(occ&&occ.length){
+      const rows=occ.map(r=>({
+        n:r['occasion name']||r['occasion']||'',
+        d:r['date (yyyy-mm-dd)']||r['date']||'',
+        type:r['type (big/small)']||r['type']||'Small'
+      })).filter(o=>o.n&&o.d&&/\d{4}-\d{2}-\d{2}/.test(o.d));
+      if(rows.length) RAW.occ=rows;
+    }
+
+    // Catalog
+    if(cat&&cat.length){
+      const rows=cat.map(r=>({
+        sku:r['sku']||'',
+        seg:r['segment']||'General',
+        type:(r['bau/temp']||'BAU').toUpperCase(),
+        ean:r['ean code']||r['ean']||''
+      })).filter(s=>s.sku);
+      if(rows.length) RAW.catalog=rows;
+    }
+
+
+    // Segment Intelligence (from Sheet)
+    const segData=await fetchSheet('segint');
+    if(segData&&segData.length){
+      const bau=segData.filter(r=>(r['type']||'').toUpperCase()==='BAU').map(r=>({
+        name:r['segment name']||r['name']||'',reason:r['reason']||'',demand:r['demand']||'Medium',
+        competitors:r['competitors']||'—',tags:(r['tags']||'').split(',').map(t=>t.trim()).filter(Boolean),
+        ic:r['icon']||'📦',priority:r['priority']||'🟡 Plan'
+      })).filter(s=>s.name);
+      const temp=segData.filter(r=>(r['type']||'').toUpperCase()==='TEMP').map(r=>({
+        name:r['segment name']||r['name']||'',reason:r['reason']||'',demand:r['demand']||'Medium',
+        competitors:r['competitors']||'—',tags:(r['tags']||'').split(',').map(t=>t.trim()).filter(Boolean),
+        ic:r['icon']||'📦',priority:r['priority']||'🟡 Plan'
+      })).filter(s=>s.name);
+      if(bau.length||temp.length){ if(bau.length) RAW.segIntel.bau=bau; if(temp.length) RAW.segIntel.temp=temp; }
+    }
+
+    // Product Improvements (from Sheet)
+    const impData=await fetchSheet('improvements');
+    if(impData&&impData.length){
+      const rows=impData.map((r,i)=>({
+        id:i+1,sku:r['sku']||'',issue:r['issue']||'',stage:r['stage']||'Plan',
+        pct:parseInt(r['progress %']||r['pct']||0),deadline:r['deadline']||'',
+        brief:r['brief']||'',detail:r['detail']||r['notes']||'',
+        platform:r['platform']||'All',priority:r['priority']||'🟡 Low'
+      })).filter(r=>r.sku);
+      if(rows.length) RAW.improvements=rows;
+    }
+
+    // Customer Feedback (from Sheet)
+    const fbData=await fetchSheet('feedback');
+    if(fbData&&fbData.length){
+      const rows=fbData.map(r=>({
+        stars:parseInt(r['stars']||r['rating']||5),text:r['review']||r['text']||'',
+        platform:r['platform']||'',sku:r['sku']||'',date:r['date']||''
+      })).filter(r=>r.text);
+      if(rows.length) RAW.cx.feedback=rows;
+    }
+
+    // Marketing (from Sheet)
+    const mktData=await fetchSheet('marketing');
+    if(mktData&&mktData.length){
+      const rows=mktData.map(r=>({
+        ic:r['icon']||'📣',title:r['campaign']||r['title']||'',desc:r['description']||r['desc']||'',
+        status:r['status']||'Planned',statusCls:'b-gold',channel:r['channel']||''
+      })).filter(r=>r.title);
+      if(rows.length) RAW.cx.mkt=rows;
+    }
+
+    // Pipeline
+    if(pip&&pip.length){
+      const rows=pip.map(r=>({
+        n:r['product name']||'',brand:r['brand']||'',
+        seg:r['segment']||'',stage:r['stage']||'Idea',owner:r['owner']||''
+      })).filter(p=>p.n);
+      if(rows.length) RAW.pipeline=rows;
+    }
+
+    showToast('✅ Live data loaded!');
+  }catch(e){
+    showToast('⚠️ Using sample data');
+  }
+  renderAll();
+}
+
+async function refreshAll(){
+  await fetchLiveData();
+}
+
+// ══════════════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════════════
+function renderAll(){
+  rendered.clear();
+  rendered.add('home');
+  renderHome();
+  renderCatalogInit();
+  if(curPage==='platforms') renderPlatforms();
+  if(curPage==='occasions') renderOccasions();
+  if(curPage==='brands') renderBrands();
+  if(curPage==='skuperf') renderSkuPerf();
+  if(curPage==='segint') renderSegInt();
+  if(curPage==='improve') renderImprove();
+  if(curPage==='cx') renderCX();
+  if(curPage==='pipeline') renderPipeline();
+  if(curPage==='reports') renderReports();
+  if(curPage==='users') renderUsers();
+}
+
+// ══════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════
+function renderHome(){
+  const periods=sortPeriods(RAW.platRows.map(r=>r.month+' '+r.year));
+  const last=periods[periods.length-1]||'Jan 2026';
+  const prev=periods[periods.length-2]||'';
+  const [lm,ly]=last.split(' ');
+  const [pm,py]=(prev||'').split(' ');
+  const cur=RAW.platRows.filter(r=>r.month===lm&&String(r.year)===ly).reduce((s,r)=>s+r.qty,0);
+  const prv=prev?RAW.platRows.filter(r=>r.month===pm&&String(r.year)===py).reduce((s,r)=>s+r.qty,0):0;
+  const growth=prv>0?(((cur-prv)/prv)*100).toFixed(1):0;
+
+  document.getElementById('heroLbl').textContent=last+' — Total Sales';
+  document.getElementById('heroVal').textContent=N(cur);
+  document.getElementById('heroGrowth').textContent=(growth>0?'+':'')+growth;
+
+  // Occasions
+  const occs=calcOcc(RAW.occ);
+  const urgent=occs.filter(o=>o.cls==='red'||o.cls==='orange');
+  document.getElementById('urgentCnt').textContent=urgent.length;
+  const badge=document.getElementById('occBadge');
+  badge.textContent=urgent.length;
+  badge.classList.toggle('show',urgent.length>0);
+  const next=occs.find(o=>o.days>=0);
+  document.getElementById('heroNext').textContent=next?next.n+' '+next.days+'d':'All clear';
+
+  // KPIs
+  const plats=new Set(RAW.platRows.filter(r=>r.month===lm&&String(r.year)===ly).map(r=>r.platform));
+  document.getElementById('homePlats').textContent=plats.size;
+  document.getElementById('homeSKUs').textContent=RAW.catalog.length;
+
+  // Alerts
+  const el=document.getElementById('homeAlerts');
+  el.innerHTML=urgent.length
+    ?urgent.slice(0,3).map(alertCard).join('')
+    :`<div class="ic green">✅ No urgent occasions in the next 30 days.</div>`;
+
+  // Trend chart
+  const tLabels=periods.slice(-6);
+  const tData=tLabels.map(p=>{const[m,y]=p.split(' ');return RAW.platRows.filter(r=>r.month===m&&String(r.year)===y).reduce((s,r)=>s+r.qty,0)});
+  const tColors=tLabels.map((_,i,a)=>i===a.length-1?'#B5175E':'#F48FB1');
+  mk('trendChart',{type:'bar',data:{labels:tLabels,datasets:[{data:tData,backgroundColor:tColors,borderRadius:10,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  // Brand chart latest month
+  const bPeriods=sortPeriods(RAW.brandRows.map(r=>r.month+' '+r.year));
+  const bLast=bPeriods[bPeriods.length-1]||'Jan 2026';
+  const [blm,bly]=bLast.split(' ');
+  const bMap={};
+  RAW.brandRows.filter(r=>r.month===blm&&String(r.year)===bly).forEach(r=>{bMap[r.brand]=(bMap[r.brand]||0)+r.qty});
+  const bL=Object.keys(bMap),bV=bL.map(b=>bMap[b]),bC=bL.map(b=>BRAND_COLORS[b.toLowerCase().replace(/\s+/g,'')]||'#888');
+  if(bL.length) mk('brandHomeChart',{type:'bar',data:{labels:bL,datasets:[{data:bV,backgroundColor:bC,borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false}}}}});
+}
+
+function alertCard(o){
+  const col=o.cls==='red'?'#C62828':o.cls==='orange'?'#D84315':'#E8960C';
+  return`<div class="ai ${o.cls}"><div style="flex:1"><div class="a-name">${o.n}</div><div class="a-meta">📅 ${o.fmt} · ${o.type} Occasion</div></div><div class="dp"><div class="dn" style="color:${col}">${o.days}</div><div class="dl">days</div></div></div>`;
+}
+
+// ══════════════════════════════════════════════════
+// PLATFORMS
+// ══════════════════════════════════════════════════
+function renderPlatforms(){
+  const rows=RAW.platRows;
+  const years=['All Years',...getYears(rows)];
+  const months=['All Months',...getMonths(rows)];
+  const periods=sortPeriods(rows.map(r=>r.month+' '+r.year));
+  const pOpts=['—',...periods];
+
+  fillSel('platYear',years);fillSel('platMonth',months);
+  fillSel('platCmpA',pOpts);fillSel('platCmpB',pOpts);
+
+  const y=document.getElementById('platYear').value||'All Years';
+  const m=document.getElementById('platMonth').value||'All Months';
+  const cA=document.getElementById('platCmpA').value||'—';
+  const cB=document.getElementById('platCmpB').value||'—';
+  const label=m!=='All Months'?m+' '+y:y!=='All Years'?y:'All Time';
+
+  const filtered=filterR(rows,y,m);
+  const byPlat=sumBy(filtered,'platform');
+  const sorted=Object.entries(byPlat).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0);
+  const max=sorted[0]?.[1]||1;
+
+  // KPIs
+  document.getElementById('platKpis').innerHTML=`
+    <div class="mc pink"><div class="mc-ic">📦</div><div class="mc-val">${N(total)}</div><div class="mc-lbl">Total Units</div><div class="mc-sub" style="color:var(--ink3)">${label}</div></div>
+    <div class="mc gold"><div class="mc-ic">🏪</div><div class="mc-val">${sorted.length}</div><div class="mc-lbl">Platforms</div><div class="mc-sub" style="color:var(--gold)">Active</div></div>`;
+
+  // Bars
+  document.getElementById('platBarsTitle').textContent='Units Sold — '+label;
+  document.getElementById('platBars').innerHTML=sorted.map(([p,v],i)=>`
+    <div class="pr"><div class="pn">${p}</div><div class="pb"><div class="pf" style="width:${(v/max*100).toFixed(1)}%;background:${BC[i%BC.length]}"></div></div><div class="pv">${N(v)}</div></div>`).join('');
+
+  // Chart
+  const hasCmp=cA!=='—'&&cB!=='—'&&cA!==cB;
+  if(hasCmp){
+    const [mA,yA]=cA.split(' ');const [mB,yB]=cB.split(' ');
+    const bA=sumBy(filterR(rows,yA,mA),'platform');
+    const bB=sumBy(filterR(rows,yB,mB),'platform');
+    const pList=[...new Set([...Object.keys(bA),...Object.keys(bB)])].sort();
+    document.getElementById('platChartTitle').textContent=cA+' vs '+cB;
+    mk('platChart',{type:'bar',data:{labels:pList,datasets:[
+      {label:cA,data:pList.map(p=>bA[p]||0),backgroundColor:'#F48FB1',borderRadius:4},
+      {label:cB,data:pList.map(p=>bB[p]||0),backgroundColor:'#B5175E',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false},ticks:{maxRotation:40,font:{size:10}}}}}});
+  } else {
+    document.getElementById('platChartTitle').textContent=label+' — All Platforms';
+    mk('platChart',{type:'bar',data:{labels:sorted.map(([p])=>p),datasets:[{label:'Units',data:sorted.map(([,v])=>v),backgroundColor:'#B5175E',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false},ticks:{maxRotation:40,font:{size:10}}}}}});
+  }
+
+  // QC
+  const qc=[['Zepto','⚡'],['Blinkit','🚀'],['Instamart','🛒']];
+  const qcVals=qc.map(([p])=>byPlat[p]||0);
+  const qcTotal=qcVals.reduce((s,v)=>s+v,0);
+  document.getElementById('qcGrid').innerHTML=[
+    ...qc.map(([p,ic],i)=>`<div class="qc"><div class="qv">${N(qcVals[i])}</div><div class="ql">${ic} ${p}</div></div>`),
+    `<div class="qc" style="border-color:var(--pink);background:var(--pink-l)"><div class="qv" style="color:var(--pink)">${N(qcTotal)}</div><div class="ql" style="color:var(--pink)">Total Q-Comm</div></div>`
+  ].join('');
+
+  // Table — last 6 periods
+  const tPeriods=periods.slice(-6);
+  const allPlats=[...new Set(rows.map(r=>r.platform))].sort();
+  const thead=`<thead><tr><th>Platform</th>${tPeriods.map(p=>`<th>${p}</th>`).join('')}</tr></thead>`;
+  const tbody=allPlats.map(p=>{
+    const cells=tPeriods.map(per=>{
+      const [pm,py]=per.split(' ');
+      const v=filterR(rows,py,pm).filter(r=>r.platform===p).reduce((s,r)=>s+r.qty,0);
+      return`<td style="text-align:right;font-family:'DM Mono',monospace;font-weight:${v?'700':'400'};color:${v?'var(--pink)':'var(--ink3)'}">${v?N(v):'—'}</td>`;
+    }).join('');
+    return`<tr><td><strong>${p}</strong></td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('platTable').innerHTML=thead+'<tbody>'+tbody+'</tbody>';
+}
+
+// ══════════════════════════════════════════════════
+// OCCASIONS
+// ══════════════════════════════════════════════════
+function renderOccasions(){
+  document.getElementById('occDate').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const occs=calcOcc(RAW.occ);
+  const groups=[
+    {lbl:'🔴 Act Now — Within 15 Days',cls:'red',f:o=>o.cls==='red'},
+    {lbl:'🟠 Prepare Soon — 15–30 Days',cls:'orange',f:o=>o.cls==='orange'},
+    {lbl:'🟡 Plan Ahead — 30–90 Days',cls:'yellow',f:o=>o.cls==='yellow'},
+  ];
+  const html=groups.map(g=>{
+    const items=occs.filter(g.f);if(!items.length)return'';
+    const col=g.cls==='red'?'#C62828':g.cls==='orange'?'#D84315':'#795548';
+    return`<div style="font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 7px;color:${col}">${g.lbl}</div>`+items.map(alertCard).join('');
+  }).join('');
+  document.getElementById('allAlerts').innerHTML=html||`<div class="ic green">✅ No alerts in the next 90 days.</div>`;
+  const bCls=o=>({red:'b-red',orange:'b-orange',yellow:'b-gold',green:'b-green',gray:'b-gray'}[o.cls]||'b-gray');
+  document.getElementById('occTable').innerHTML=
+    `<thead><tr><th>Occasion</th><th>Date</th><th>Type</th><th>Days</th><th>Alert</th></tr></thead><tbody>`+
+    occs.map(o=>`<tr>
+      <td><strong>${o.n}</strong></td>
+      <td style="white-space:nowrap;font-size:11px">${o.fmt}</td>
+      <td><span class="badge ${o.type==='Big'?'b-pink':'b-purple'}">${o.type}</span></td>
+      <td style="font-weight:800;font-family:'DM Mono',monospace;color:${o.days<0?'var(--ink3)':o.days<=15?'var(--red)':o.days<=30?'var(--orange)':o.days<=90?'var(--gold)':'var(--green)'}">${o.days<0?'Past':o.days+'d'}</td>
+      <td><span class="badge ${bCls(o)}">${o.lbl}</span></td>
+    </tr>`).join('')+'</tbody>';
+}
+
+// ══════════════════════════════════════════════════
+// CATALOG
+// ══════════════════════════════════════════════════
+let skuTypF='all', skuSegF='all';
+function renderCatalogInit(){
+  const segs=['All Segments',...new Set(RAW.catalog.map(s=>s.seg))].sort((a,b)=>a==='All Segments'?-1:b==='All Segments'?1:a.localeCompare(b));
+  document.getElementById('segWrap').innerHTML=segs.map(s=>`<div class="sch${s==='All Segments'?' active':''}" onclick="setSegF('${s.replace(/'/g,"\\'")}',this)">${s}</div>`).join('');
+  renderCatalog();
+}
+function setTypeF(v,el){skuTypF=v;document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderCatalog()}
+function setSegF(v,el){skuSegF=v;document.querySelectorAll('.sch').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderCatalog()}
+function renderCatalog(){
+  const q=(document.getElementById('skuSrch')?.value||'').toLowerCase().trim();
+  let data=RAW.catalog;
+  if(skuTypF==='BAU') data=data.filter(s=>s.type==='BAU');
+  if(skuTypF==='TEMP') data=data.filter(s=>s.type==='TEMP');
+  if(skuSegF!=='all'&&skuSegF!=='All Segments') data=data.filter(s=>s.seg===skuSegF);
+  if(q) data=data.filter(s=>s.sku.toLowerCase().includes(q)||s.seg.toLowerCase().includes(q)||(s.ean||'').includes(q));
+  document.getElementById('skuCnt').textContent=`Showing ${data.length} SKU${data.length!==1?'s':''}`;
+  if(!data.length){document.getElementById('skuList').innerHTML=`<div class="no-res"><div class="no-res-ic">🔍</div><p style="font-size:14px;font-weight:600">No SKUs found</p></div>`;return}
+  const dot={BAU:'#1B7C3A',TEMP:'#E8960C'};
+  const bdg={BAU:'b-green',TEMP:'b-gold'};
+  document.getElementById('skuList').innerHTML=data.map(s=>`
+    <div class="sku-row">
+      <div class="sku-dot" style="background:${dot[s.type]||'#aaa'}"></div>
+      <div class="sku-main"><div class="sku-code">${s.sku}</div><div class="sku-seg">${s.seg}</div></div>
+      <div class="sku-right">
+        <span class="badge ${bdg[s.type]||'b-gray'}">${s.type}</span>
+        ${s.ean?`<span class="sku-ean">${s.ean}</span>`:'<span class="sku-ean" style="color:#ccc">No EAN</span>'}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// BRANDS
+// ══════════════════════════════════════════════════
+function renderBrands(){
+  const rows=RAW.brandRows;
+  const years=['All Years',...getYears(rows)];
+  const months=['All Months',...getMonths(rows)];
+  const periods=sortPeriods(rows.map(r=>r.month+' '+r.year));
+  const pOpts=['—',...periods];
+
+  fillSel('brandYear',years);fillSel('brandMonth',months);
+  fillSel('brandCmpA',pOpts);fillSel('brandCmpB',pOpts);
+
+  const y=document.getElementById('brandYear').value||'All Years';
+  const m=document.getElementById('brandMonth').value||'All Months';
+  const cA=document.getElementById('brandCmpA').value||'—';
+  const cB=document.getElementById('brandCmpB').value||'—';
+  const label=m!=='All Months'?m+' '+y:y!=='All Years'?y:'All Time';
+
+  document.getElementById('brandTitle').textContent='Brand Performance — '+label;
+  const filtered=filterR(rows,y,m);
+  const bMap={};
+  filtered.forEach(r=>{if(!bMap[r.brand])bMap[r.brand]={b:r.brand,qty:0,c:r.c||BRAND_COLORS[r.brand.toLowerCase().replace(/\s+/g,'')]||'#888'};bMap[r.brand].qty+=r.qty;});
+  const brands=Object.values(bMap).sort((a,b)=>b.qty-a.qty);
+  const total=brands.reduce((s,b)=>s+b.qty,0);
+
+  const hasCmp=cA!=='—'&&cB!=='—'&&cA!==cB;
+  if(hasCmp){
+    const [mA,yA]=cA.split(' ');const [mB,yB]=cB.split(' ');
+    const bA=sumBy(filterR(rows,yA,mA),'brand');
+    const bB=sumBy(filterR(rows,yB,mB),'brand');
+    const bList=[...new Set([...Object.keys(bA),...Object.keys(bB)])].sort();
+    mk('brandChart',{type:'bar',data:{labels:bList,datasets:[
+      {label:cA,data:bList.map(b=>bA[b]||0),backgroundColor:'#F48FB1',borderRadius:4},
+      {label:cB,data:bList.map(b=>bB[b]||0),backgroundColor:'#B5175E',borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false}}}}});
+  } else {
+    mk('brandChart',{type:'doughnut',data:{labels:brands.map(b=>b.b),datasets:[{data:brands.map(b=>b.qty),backgroundColor:brands.map(b=>b.c),borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:12},padding:12}},tooltip:{callbacks:{label:c=>`${N(c.raw)} (${(c.raw/total*100).toFixed(1)}%)`}}}}});
+  }
+
+  document.getElementById('brandBars').innerHTML=brands.map(b=>`
+    <div class="br-row">
+      <div class="br-top"><div class="br-nm">${b.b}</div><div class="br-vl" style="color:${b.c}">${N(b.qty)}</div></div>
+      <div class="br-bar"><div class="br-fi" style="width:${total?(b.qty/total*100).toFixed(1):0}%;background:${b.c}"></div></div>
+      <div class="br-pc">${total?(b.qty/total*100).toFixed(1):0}% of ${label} sales</div>
+    </div>`).join('');
+
+  const thead=`<thead><tr><th>Brand</th>${periods.map(p=>`<th>${p}</th>`).join('')}<th>Share</th></tr></thead>`;
+  const tbody=brands.map(b=>{
+    const cells=periods.map(p=>{
+      const [pm,py]=p.split(' ');
+      const v=filterR(rows,py,pm).filter(r=>r.brand===b.b).reduce((s,r)=>s+r.qty,0);
+      return`<td style="text-align:right;font-family:'DM Mono',monospace;font-weight:${v?'700':'400'};color:${v?b.c:'var(--ink3)'}">${v?N(v):'—'}</td>`;
+    }).join('');
+    return`<tr><td><strong>${b.b}</strong></td>${cells}<td style="font-weight:700">${total?(b.qty/total*100).toFixed(1):0}%</td></tr>`;
+  }).join('');
+  document.getElementById('brandTable').innerHTML=thead+'<tbody>'+tbody+'</tbody>';
+}
+
+// ══════════════════════════════════════════════════
+// SKU PERFORMANCE
+// ══════════════════════════════════════════════════
+function renderSkuPerf(){
+  const rows=RAW.skuRows;
+  fillSel('skuYear',['All Years',...getYears(rows)]);
+  fillSel('skuMonth',['All Months',...getMonths(rows)]);
+
+  const y=document.getElementById('skuYear').value||'All Years';
+  const m=document.getElementById('skuMonth').value||'All Months';
+  const topN=parseInt(document.getElementById('skuTopN').value||10);
+  const label=m!=='All Months'?m+' '+y:y!=='All Years'?y:'All Time';
+
+  document.getElementById('skuPerfTitle').textContent=`Top ${topN} SKUs — ${label}`;
+  const filtered=filterR(rows,y,m);
+  const sMap={};
+  filtered.forEach(r=>{if(!sMap[r.sku])sMap[r.sku]={s:r.sku,q:0,seg:r.seg||'—'};sMap[r.sku].q+=r.qty;});
+  const skus=Object.values(sMap).sort((a,b)=>b.q-a.q).slice(0,topN);
+
+  mk('skuChart',{type:'bar',data:{labels:skus.slice(0,10).map(s=>s.s.length>22?s.s.slice(0,22)+'…':s.s),datasets:[{label:'Units',data:skus.slice(0,10).map(s=>s.q),backgroundColor:'#B5175E',borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  document.getElementById('skuTable').innerHTML=
+    `<thead><tr><th>#</th><th>SKU</th><th>Segment</th><th>Units</th></tr></thead><tbody>`+
+    skus.map((s,i)=>`<tr><td><span class="rk ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td><td style="font-weight:600;font-size:11px">${s.s}</td><td><span class="badge b-pink">${s.seg}</span></td><td style="font-weight:800;color:var(--pink);font-family:'DM Mono',monospace">${N(s.q)}</td></tr>`).join('')+'</tbody>';
+}
+
+
+// ══════════════════════════════════════════════════
+// SEGMENT INTELLIGENCE
+// ══════════════════════════════════════════════════
+let siTab='bau';
+function setSiTab(tab,el){
+  siTab=tab;
+  document.querySelectorAll('.pi-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderSegInt();
+}
+function renderSegInt(){
+  const data=RAW.segIntel;
+  const all=[...data.bau,...data.temp];
+  document.getElementById('siUrgent').textContent=all.filter(s=>s.priority.includes('Urgent')).length;
+  document.getElementById('siTotal').textContent=all.length;
+  const rows=siTab==='bau'?data.bau:data.temp;
+  const bgMap={'🔴 Urgent':'var(--red-l)','🟠 Soon':'var(--ora-l)','🟡 Plan':'var(--gold-l)'};
+  const groups=[
+    {lbl:'🔴 Urgent — Add This Quarter',f:r=>r.priority.includes('Urgent'),bg:'var(--red-l)',bc:'var(--red)'},
+    {lbl:'🟠 Coming Soon — Next Quarter',f:r=>r.priority.includes('Soon'),bg:'var(--ora-l)',bc:'var(--orange)'},
+    {lbl:'🟡 Plan — 6+ Months',f:r=>r.priority.includes('Plan'),bg:'var(--gold-l)',bc:'var(--gold)'},
+  ];
+  let html='';
+  groups.forEach(g=>{
+    const items=rows.filter(g.f);
+    if(!items.length) return;
+    html+=`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:${g.bc};margin:12px 0 6px">${g.lbl}</div>`;
+    html+=`<div class="seg-card">`;
+    html+=items.map(s=>`
+      <div class="seg-item">
+        <div class="seg-item-ic" style="background:${bgMap[s.priority]||'var(--bg)'}">${s.ic}</div>
+        <div class="seg-item-body">
+          <div class="seg-item-name">${s.name}</div>
+          <div class="seg-item-desc">${s.reason}</div>
+          <div class="seg-item-tags">
+            ${s.tags.map(t=>`<span class="badge b-pink">${t}</span>`).join('')}
+            <span class="badge b-gray">🏪 ${s.competitors}</span>
+            <span class="badge ${s.demand==='Very High'?'b-red':s.demand==='High'?'b-orange':'b-gold'}">📈 ${s.demand} Demand</span>
+          </div>
+        </div>
+      </div>`).join('');
+    html+=`</div>`;
+  });
+  document.getElementById('siContent').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════
+// PRODUCT IMPROVEMENT
+// ══════════════════════════════════════════════════
+let impTab='Plan';
+function setImpTab(stage){
+  impTab=stage;
+  const tabMap={Plan:'impTabPlan','In Development':'impTabDev',Closure:'impTabClose'};
+  const colMap={Plan:'var(--gold)','In Development':'var(--blue)',Closure:'var(--green)'};
+  Object.entries(tabMap).forEach(([s,id])=>{
+    const el=document.getElementById(id);
+    if(el) el.style.border=s===stage?`2px solid ${colMap[s]}`:'2px solid transparent';
+  });
+  renderImpList();
+}
+function renderImprove(){
+  const imps=RAW.improvements;
+  const cnt=s=>imps.filter(i=>i.stage===s).length;
+  const plan=cnt('Plan'),dev=cnt('In Development'),cls=cnt('Closure');
+  document.getElementById('impPlan').textContent=plan;
+  document.getElementById('impDev').textContent=dev;
+  document.getElementById('impClose').textContent=cls;
+  const total=imps.length||1;
+  document.getElementById('impStageBar').innerHTML=
+    `<div class="stage-seg" style="flex:${plan/total};background:var(--gold)">${plan>0?plan+' Plan':''}</div>`+
+    `<div class="stage-seg" style="flex:${dev/total};background:var(--blue)">${dev>0?dev+' Dev':''}</div>`+
+    `<div class="stage-seg" style="flex:${cls/total};background:var(--green)">${cls>0?cls+' Done':''}</div>`;
+  // Set active tab to first non-empty stage
+  if(!imps.filter(i=>i.stage===impTab).length){
+    if(plan>0) impTab='Plan';
+    else if(dev>0) impTab='In Development';
+    else impTab='Closure';
+  }
+  setImpTab(impTab);
+}
+function renderImpList(){
+  const filtered=RAW.improvements.filter(i=>i.stage===impTab);
+  const titleMap={Plan:'📋 Plan — Upcoming Fixes','In Development':'🔧 In Development','Closure':'✅ Closure — Nearly Done'};
+  const el=document.getElementById('impListTitle');
+  if(el) el.textContent=titleMap[impTab]||impTab;
+  const stageCls={Plan:'b-gold','In Development':'b-blue',Closure:'b-green'};
+  const prCls={'🔴 High':'b-red','🟠 Medium':'b-orange','🟡 Low':'b-gold'};
+  const today=new Date();
+  if(!filtered.length){
+    document.getElementById('impList').innerHTML=`<div class="ic green">✅ No items in this stage yet.</div>`;
+    return;
+  }
+  document.getElementById('impList').innerHTML=filtered.map(imp=>{
+    const dl=new Date(imp.deadline);
+    const days=isNaN(dl)?999:Math.round((dl-today)/(1000*60*60*24));
+    const dlColor=days<0?'var(--red)':days<=14?'var(--orange)':'var(--ink3)';
+    const barColor=imp.stage==='Closure'?'var(--green)':imp.stage==='In Development'?'var(--blue)':'var(--gold)';
+    const dlText=isNaN(dl)?imp.deadline:dl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+(days<0?' ('+Math.abs(days)+'d overdue)':' ('+days+'d left)');
+    return`<div class="imp-card">
+      <div class="imp-hd">
+        <div class="imp-title">${imp.sku}</div>
+        <span class="badge ${stageCls[imp.stage]||'b-gray'}">${imp.stage}</span>
+      </div>
+      <div class="imp-meta">
+        <span class="badge ${prCls[imp.priority]||'b-gray'}">${imp.priority}</span>
+        <span class="badge b-blue">📱 ${imp.platform}</span>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">⚠️ ${imp.issue}</div>
+      <div class="imp-progress">
+        <div class="imp-bar-row">
+          <div class="imp-bar-bg"><div class="imp-bar-fi" style="width:${imp.pct}%;background:${barColor}"></div></div>
+          <div class="imp-pct">${imp.pct}%</div>
+        </div>
+      </div>
+      <div class="imp-deadline" style="color:${dlColor};margin-top:6px">📅 ${dlText}</div>
+      ${imp.brief?`<div class="imp-desc"><strong>Brief:</strong> ${imp.brief}${imp.detail?'<br><strong>Detail:</strong> '+imp.detail:''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// CUSTOMER & MARKETING
+// ══════════════════════════════════════════════════
+function renderCX(){
+  const fb=RAW.cx.feedback;
+  const mkt=RAW.cx.mkt;
+  const avg=(fb.reduce((s,f)=>s+f.stars,0)/fb.length).toFixed(1);
+  document.getElementById('cxAvg').textContent=avg;
+  document.getElementById('cxFb').textContent=fb.length;
+  document.getElementById('cxMkt').textContent=mkt.length;
+  document.getElementById('cxFbList').innerHTML=`<div class="card-t">Recent Reviews</div>`+fb.map(f=>`
+    <div class="fb-item">
+      <div style="flex-shrink:0;font-size:20px">${f.stars>=4?'😊':f.stars<=2?'😞':'😐'}</div>
+      <div style="flex:1">
+        <div class="fb-stars">${'★'.repeat(f.stars)}${'☆'.repeat(5-f.stars)}</div>
+        <div class="fb-text">"${f.text}"</div>
+        <div class="fb-meta">📱 ${f.platform} · 🏷️ ${f.sku} · 📅 ${f.date}</div>
+      </div>
+    </div>`).join('');
+  const statusCls={'Active':'b-green','Planned':'b-gold','Pending Setup':'b-orange','In Progress':'b-blue'};
+  document.getElementById('cxMktList').innerHTML=mkt.map(m=>`
+    <div class="cm-card">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="mkt-ic" style="background:var(--pink-l)">${m.ic}</div>
+        <div class="mkt-body">
+          <div class="mkt-title">${m.title}</div>
+          <div class="mkt-desc">${m.desc}</div>
+          <div class="mkt-status">
+            <span class="badge ${statusCls[m.status]||'b-gray'}">${m.status}</span>
+            <span class="badge b-purple">📡 ${m.channel}</span>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+  const starCounts=[5,4,3,2,1].map(s=>fb.filter(f=>f.stars===s).length);
+  mk('cxRatingChart',{type:'bar',data:{labels:['5★','4★','3★','2★','1★'],datasets:[{data:starCounts,backgroundColor:['#1B7C3A','#4CAF50','#E8960C','#FF7043','#C62828'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{stepSize:1}},x:{grid:{display:false}}}}});
+}
+
+// ══════════════════════════════════════════════════
+// PIPELINE
+// ══════════════════════════════════════════════════
+function renderPipeline(){
+  const cnt=s=>RAW.pipeline.filter(p=>p.stage===s).length;
+  document.getElementById('pIdea').textContent=cnt('Idea');
+  document.getElementById('pDesign').textContent=cnt('Design')||0;
+  document.getElementById('pLaunch').textContent=cnt('Launch')||0;
+  const sc={Idea:'b-gold',Design:'b-orange',Approval:'b-purple',Launch:'b-green'};
+  document.getElementById('pipelineList').innerHTML=RAW.pipeline.map(p=>`
+    <div class="pipe-c">
+      <div><div class="pipe-nm">${p.n}</div><div class="pipe-mt"><span>🏷️ ${p.brand}</span><span>📂 ${p.seg}</span><span>👤 ${p.owner}</span></div></div>
+      <span class="badge ${sc[p.stage]||'b-gray'}">${p.stage}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════════════
+function renderReports(){
+  const periods=sortPeriods(RAW.platRows.map(r=>r.month+' '+r.year));
+  const last=periods[periods.length-1]||'';
+  const prev=periods[periods.length-2]||'';
+  const [lm,ly]=(last||'Jan 2026').split(' ');
+  const [pm,py]=(prev||'').split(' ');
+  const cur=RAW.platRows.filter(r=>r.month===lm&&String(r.year)===ly).reduce((s,r)=>s+r.qty,0);
+  const prv=prev?RAW.platRows.filter(r=>r.month===pm&&String(r.year)===py).reduce((s,r)=>s+r.qty,0):0;
+  const growth=prv>0?(((cur-prv)/prv)*100).toFixed(1):0;
+
+  document.getElementById('rPrevLbl').textContent=prev||'Prev Month';
+  document.getElementById('rCurLbl').textContent=last||'Latest';
+  document.getElementById('rPrev').textContent=N(prv);
+  document.getElementById('rCur').textContent=N(cur);
+  document.getElementById('rGrowth').textContent=(growth>0?'+':'')+growth+'%';
+  document.getElementById('rGrowth').style.color=growth>=0?'var(--green)':'var(--red)';
+
+  const pMap={};
+  RAW.platRows.filter(r=>r.month===lm&&String(r.year)===ly).forEach(r=>{pMap[r.platform]=(pMap[r.platform]||0)+r.qty});
+  const top=Object.entries(pMap).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('rTop').textContent=top?top[0]:'—';
+
+  // Trend line
+  const tVals=periods.map(p=>{const [m,y]=p.split(' ');return RAW.platRows.filter(r=>r.month===m&&String(r.year)===y).reduce((s,r)=>s+r.qty,0)});
+  mk('repTrend',{type:'line',data:{labels:periods,datasets:[{label:'Units',data:tVals,borderColor:'#B5175E',backgroundColor:'rgba(181,23,94,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#B5175E'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?(v/1000)+'K':v}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  // Pie
+  const pList=Object.entries(pMap).filter(([,v])=>v>0);
+  mk('repPie',{type:'doughnut',data:{labels:pList.map(([p])=>p),datasets:[{data:pList.map(([,v])=>v),backgroundColor:BC,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}}}});
+}
+
+// ══════════════════════════════════════════════════
+// USERS
+// ══════════════════════════════════════════════════
+function renderUsers(){
+  const sess=getSession();
+  document.getElementById('userListEl').innerHTML=getUsers().map(u=>`
+    <div class="pipe-c">
+      <div>
+        <div class="pipe-nm">${u.name}</div>
+        <div class="pipe-mt"><span>📧 ${u.email}</span><span>🔑 ${u.role}</span></div>
+      </div>
+      ${u.id!==sess?.id?`<button onclick="deleteUser(${u.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Remove</button>`:'<span class="badge b-green">You</span>'}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  const sess=getSession();
+  if(sess){
+    startApp(sess);
+    fetchLiveData();
+  }
+  setInterval(()=>fetchLiveData(),5*60*1000);
+});
+</script>
+</body>
+</html>
