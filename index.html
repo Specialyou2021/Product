@@ -458,12 +458,21 @@ tbody td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:midd
     <!-- PAGE: PRODUCT IMPROVEMENT -->
     <div class="page" id="page-improve">
       <div class="imp-stage-pills">
-        <div class="isp" style="background:var(--gold-l)"><div class="isp-val" id="impPlan" style="color:var(--gold)">—</div><div class="isp-lbl" style="color:var(--gold)">Plan</div></div>
-        <div class="isp" style="background:var(--blue-l)"><div class="isp-val" id="impDev" style="color:var(--blue)">—</div><div class="isp-lbl" style="color:var(--blue)">In Dev</div></div>
-        <div class="isp" style="background:var(--green-l)"><div class="isp-val" id="impClose" style="color:var(--green)">—</div><div class="isp-lbl" style="color:var(--green)">Closure</div></div>
+        <div class="isp" id="impTabPlan" style="background:var(--gold-l);cursor:pointer;border:2px solid var(--gold)" onclick="setImpTab('Plan')">
+          <div class="isp-val" id="impPlan" style="color:var(--gold)">—</div>
+          <div class="isp-lbl" style="color:var(--gold)">📋 Plan</div>
+        </div>
+        <div class="isp" id="impTabDev" style="background:var(--blue-l);cursor:pointer;border:2px solid transparent" onclick="setImpTab('In Development')">
+          <div class="isp-val" id="impDev" style="color:var(--blue)">—</div>
+          <div class="isp-lbl" style="color:var(--blue)">🔧 In Dev</div>
+        </div>
+        <div class="isp" id="impTabClose" style="background:var(--green-l);cursor:pointer;border:2px solid transparent" onclick="setImpTab('Closure')">
+          <div class="isp-val" id="impClose" style="color:var(--green)">—</div>
+          <div class="isp-lbl" style="color:var(--green)">✅ Done</div>
+        </div>
       </div>
       <div class="stage-bar" id="impStageBar"></div>
-      <div class="sec-t"><div class="sec-dot"></div>All Improvements</div>
+      <div class="sec-t"><div class="sec-dot"></div><span id="impListTitle">Plan Stage</span></div>
       <div id="impList"></div>
     </div>
 
@@ -748,10 +757,12 @@ const RAW = {
 // ══════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════
+// Passwords stored as simple hash (not plaintext)
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return String(h>>>0);}
 const DEFAULT_USERS = [
-  {id:1,name:"Sunny Singh",  email:"sunny@specialyou.in", pass:"sunny123", role:"Admin"},
-  {id:2,name:"Cherry Saxena",email:"cherry@specialyou.in",pass:"cherry123",role:"Admin"},
-  {id:3,name:"Sheetal",      email:"sheetal@specialyou.in",pass:"sheetal123",role:"Manager"},
+  {id:1,name:"Sunny Singh",  email:"sunny@specialyou.in", pass:simpleHash("sunny123"), role:"Admin"},
+  {id:2,name:"Cherry Saxena",email:"cherry@specialyou.in",pass:simpleHash("cherry123"),role:"Admin"},
+  {id:3,name:"Sheetal",      email:"sheetal@specialyou.in",pass:simpleHash("sheetal123"),role:"Manager"},
 ];
 function getUsers(){try{return JSON.parse(localStorage.getItem('sy_users'))||DEFAULT_USERS}catch(e){return DEFAULT_USERS}}
 function saveUsers(u){localStorage.setItem('sy_users',JSON.stringify(u))}
@@ -762,7 +773,7 @@ function clearSession(){sessionStorage.removeItem('sy_sess')}
 function doLogin(){
   const em=document.getElementById('lEmail').value.trim().toLowerCase();
   const pw=document.getElementById('lPass').value;
-  const user=getUsers().find(u=>u.email.toLowerCase()===em&&u.pass===pw);
+  const user=getUsers().find(u=>u.email.toLowerCase()===em&&u.pass===simpleHash(pw));
   if(!user){document.getElementById('lErr').textContent='Invalid email or password';return}
   saveSession(user);
   startApp(user);
@@ -797,7 +808,7 @@ function addUser(){
   const r=document.getElementById('newRole').value;
   if(!n||!e||!p){showToast('⚠️ Fill all fields');return}
   const users=getUsers();
-  users.push({id:Date.now(),name:n,email:e,pass:p,role:r});
+  users.push({id:Date.now(),name:n,email:e,pass:simpleHash(p),role:r});
   saveUsers(users);
   document.getElementById('newName').value='';
   document.getElementById('newEmail').value='';
@@ -858,10 +869,12 @@ function mk(id,cfg){
   CH[id]=new Chart(el.getContext('2d'),cfg);
 }
 
+let _toastT=null;
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  if(_toastT) clearTimeout(_toastT);
+  _toastT=setTimeout(()=>{t.classList.remove('show');_toastT=null;},2500);
 }
 
 function sortPeriods(arr){
@@ -1404,6 +1417,17 @@ function renderSegInt(){
 // ══════════════════════════════════════════════════
 // PRODUCT IMPROVEMENT
 // ══════════════════════════════════════════════════
+let impTab='Plan';
+function setImpTab(stage){
+  impTab=stage;
+  const tabMap={Plan:'impTabPlan','In Development':'impTabDev',Closure:'impTabClose'};
+  const colMap={Plan:'var(--gold)','In Development':'var(--blue)',Closure:'var(--green)'};
+  Object.entries(tabMap).forEach(([s,id])=>{
+    const el=document.getElementById(id);
+    if(el) el.style.border=s===stage?`2px solid ${colMap[s]}`:'2px solid transparent';
+  });
+  renderImpList();
+}
 function renderImprove(){
   const imps=RAW.improvements;
   const cnt=s=>imps.filter(i=>i.stage===s).length;
@@ -1412,17 +1436,36 @@ function renderImprove(){
   document.getElementById('impDev').textContent=dev;
   document.getElementById('impClose').textContent=cls;
   const total=imps.length||1;
-  document.getElementById('impStageBar').innerHTML=`
-    <div class="stage-seg" style="flex:${plan/total};background:var(--gold)">${plan>0?'Plan':''}</div>
-    <div class="stage-seg" style="flex:${dev/total};background:var(--blue)">${dev>0?'Dev':''}</div>
-    <div class="stage-seg" style="flex:${cls/total};background:var(--green)">${cls>0?'Done':''}</div>`;
+  document.getElementById('impStageBar').innerHTML=
+    `<div class="stage-seg" style="flex:${plan/total};background:var(--gold)">${plan>0?plan+' Plan':''}</div>`+
+    `<div class="stage-seg" style="flex:${dev/total};background:var(--blue)">${dev>0?dev+' Dev':''}</div>`+
+    `<div class="stage-seg" style="flex:${cls/total};background:var(--green)">${cls>0?cls+' Done':''}</div>`;
+  // Set active tab to first non-empty stage
+  if(!imps.filter(i=>i.stage===impTab).length){
+    if(plan>0) impTab='Plan';
+    else if(dev>0) impTab='In Development';
+    else impTab='Closure';
+  }
+  setImpTab(impTab);
+}
+function renderImpList(){
+  const filtered=RAW.improvements.filter(i=>i.stage===impTab);
+  const titleMap={Plan:'📋 Plan — Upcoming Fixes','In Development':'🔧 In Development','Closure':'✅ Closure — Nearly Done'};
+  const el=document.getElementById('impListTitle');
+  if(el) el.textContent=titleMap[impTab]||impTab;
   const stageCls={Plan:'b-gold','In Development':'b-blue',Closure:'b-green'};
   const prCls={'🔴 High':'b-red','🟠 Medium':'b-orange','🟡 Low':'b-gold'};
   const today=new Date();
-  document.getElementById('impList').innerHTML=imps.map(imp=>{
+  if(!filtered.length){
+    document.getElementById('impList').innerHTML=`<div class="ic green">✅ No items in this stage yet.</div>`;
+    return;
+  }
+  document.getElementById('impList').innerHTML=filtered.map(imp=>{
     const dl=new Date(imp.deadline);
-    const days=Math.round((dl-today)/(1000*60*60*24));
+    const days=isNaN(dl)?999:Math.round((dl-today)/(1000*60*60*24));
     const dlColor=days<0?'var(--red)':days<=14?'var(--orange)':'var(--ink3)';
+    const barColor=imp.stage==='Closure'?'var(--green)':imp.stage==='In Development'?'var(--blue)':'var(--gold)';
+    const dlText=isNaN(dl)?imp.deadline:dl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+(days<0?' ('+Math.abs(days)+'d overdue)':' ('+days+'d left)');
     return`<div class="imp-card">
       <div class="imp-hd">
         <div class="imp-title">${imp.sku}</div>
@@ -1432,15 +1475,15 @@ function renderImprove(){
         <span class="badge ${prCls[imp.priority]||'b-gray'}">${imp.priority}</span>
         <span class="badge b-blue">📱 ${imp.platform}</span>
       </div>
-      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px">⚠️ ${imp.issue}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">⚠️ ${imp.issue}</div>
       <div class="imp-progress">
         <div class="imp-bar-row">
-          <div class="imp-bar-bg"><div class="imp-bar-fi" style="width:${imp.pct}%;background:${imp.stage==='Closure'?'var(--green)':imp.stage==='In Development'?'var(--blue)':'var(--gold)'}"></div></div>
+          <div class="imp-bar-bg"><div class="imp-bar-fi" style="width:${imp.pct}%;background:${barColor}"></div></div>
           <div class="imp-pct">${imp.pct}%</div>
         </div>
       </div>
-      <div class="imp-deadline" style="color:${dlColor}">📅 Deadline: ${dl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} (${days<0?Math.abs(days)+'d overdue':days+'d left'})</div>
-      <div class="imp-desc"><strong>Brief:</strong> ${imp.brief}<br><strong>Detail:</strong> ${imp.detail}</div>
+      <div class="imp-deadline" style="color:${dlColor};margin-top:6px">📅 ${dlText}</div>
+      ${imp.brief?`<div class="imp-desc"><strong>Brief:</strong> ${imp.brief}${imp.detail?'<br><strong>Detail:</strong> '+imp.detail:''}</div>`:''}
     </div>`;
   }).join('');
 }
