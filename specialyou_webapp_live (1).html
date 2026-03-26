@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Special You — NPD Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   RESET & TOKENS
+══════════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#B5175E;--pink2:#E91E63;--pink-d:#8B0A3C;
+  --pink-l:#FCE4EC;--pink-m:#F8BBD0;
+  --gold:#E8960C;--gold-l:#FFF8E1;
+  --green:#1B7C3A;--green-l:#E8F5E9;
+  --blue:#1565C0;--blue-l:#E3F2FD;
+  --red:#C62828;--red-l:#FFEBEE;
+  --purple:#6A1B9A;--purp-l:#F3E5F5;
+  --teal:#0F6E56;--teal-l:#E1F5EE;
+  --orange:#D84315;--ora-l:#FBE9E7;
+  --ink:#1A1A2E;--ink2:#4A4A6A;--ink3:#9090AA;
+  --bg:#FDF0F6;--surf:#fff;--bdr:#EDE0F0;
+  --nav:64px;--safe:env(safe-area-inset-bottom,0px);
+}
+
+/* ── NUCLEAR RESET — nothing scrolls except #scroll ── */
+html,body{
+  height:100%;width:100%;
+  overflow:hidden;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:#e8d5e8;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased}
+
+/* ── APP WRAP — centered column, fixed size ── */
+#appWrap{
+  position:fixed;
+  top:0;left:50%;
+  transform:translateX(-50%);
+  width:100%;max-width:540px;
+  height:100%;
+  display:flex;flex-direction:column;
+  background:var(--bg);
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(181,23,94,.15)}
+
+@media(max-width:600px){
+  #appWrap{max-width:100%;box-shadow:none}
+  body{background:var(--bg)}
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+#loginWrap{
+  position:absolute;inset:0;z-index:9000;
+  background:linear-gradient(150deg,#6A1B9A 0%,#B5175E 50%,#E91E63 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+#loginWrap::before{content:'';position:absolute;width:280px;height:280px;border-radius:50%;
+  background:rgba(255,255,255,.06);top:-60px;right:-60px;pointer-events:none;
+  animation:floatA 8s ease-in-out infinite}
+#loginWrap::after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,.05);bottom:-30px;left:-30px;pointer-events:none;
+  animation:floatB 6s ease-in-out infinite}
+@keyframes floatA{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
+@keyframes floatB{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.lbox{
+  background:rgba(255,255,255,.97);border-radius:28px;
+  padding:36px 26px 28px;width:100%;max-width:340px;
+  box-shadow:0 24px 60px rgba(0,0,0,.22);
+  animation:boxUp .55s cubic-bezier(.34,1.3,.64,1) both;position:relative;z-index:1}
+@keyframes boxUp{from{transform:translateY(36px);opacity:0}to{transform:translateY(0);opacity:1}}
+.lbox-logo{
+  width:60px;height:60px;margin:0 auto 12px;border-radius:18px;
+  background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 8px 22px rgba(181,23,94,.35);
+  animation:logoPop .6s .15s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes logoPop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.lbox-logo span{display:block;animation:sparkSpin 6s linear infinite}
+@keyframes sparkSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.lbox-brand{
+  text-align:center;font-size:24px;font-weight:800;letter-spacing:-.4px;margin-bottom:2px;
+  background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lbox-tag{text-align:center;font-size:12px;color:var(--ink3);margin-bottom:22px}
+.lf{margin-bottom:13px}
+.lf label{font-size:12px;font-weight:700;color:var(--ink2);display:block;margin-bottom:5px}
+.lf input{
+  width:100%;padding:11px 13px;border:1.5px solid var(--bdr);border-radius:12px;
+  font-size:14px;font-family:inherit;outline:none;transition:border .2s;background:var(--bg)}
+.lf input:focus{border-color:var(--pink);background:#fff}
+.l-btn{
+  width:100%;padding:14px;background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;
+  font-family:inherit;cursor:pointer;margin-top:4px;transition:opacity .2s}
+.l-btn:active{opacity:.85}
+.l-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+
+/* ══════════════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════════════ */
+#app{
+  display:none;
+  position:absolute;inset:0;
+  flex-direction:column;
+  overflow:hidden}
+#app.show{display:flex}
+
+/* ── HEADER — top, fixed, never moves ── */
+#hdr{
+  background:linear-gradient(135deg,var(--pink-d) 0%,var(--pink) 45%,var(--pink2) 100%);
+  padding:0 14px;
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+  overflow:hidden;
+  box-shadow:0 3px 20px rgba(181,23,94,.35)}
+#hdr::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+  background-size:200% 100%;animation:hdrGlow 5s ease-in-out infinite}
+@keyframes hdrGlow{0%,100%{background-position:200% center}50%{background-position:-200% center}}
+#hdr::after{content:'';position:absolute;top:-28px;right:56px;width:110px;height:110px;
+  background:rgba(255,255,255,.05);border-radius:50%;pointer-events:none}
+@media(min-width:600px){#hdr{padding:0 20px}}
+
+.hdr-top{display:flex;align-items:center;gap:10px;padding:11px 0 8px}
+.hdr-mark{
+  width:38px;height:38px;background:rgba(255,255,255,.18);border-radius:11px;
+  border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;
+  justify-content:center;font-size:18px;flex-shrink:0;position:relative;z-index:1}
+.hdr-mark span{display:block;animation:sparkSpin 8s linear infinite}
+.hdr-info{flex:1;min-width:0;z-index:1;position:relative}
+.hdr-brand{
+  font-size:17px;font-weight:800;letter-spacing:-.3px;
+  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.7) 40%,#fff 65%,rgba(255,255,255,.8) 100%);
+  background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:brandShimmer 4s ease-in-out infinite 1s}
+@keyframes brandShimmer{0%,100%{background-position:0 center}50%{background-position:200% center}}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;margin-top:1px;
+  display:flex;align-items:center;gap:4px}
+.hdr-sub .sep{color:rgba(255,255,255,.35)}
+
+/* Next occasion chip in header */
+.hdr-occ{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:4px 9px;font-size:10px;font-weight:700;color:#fff;
+  white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;z-index:1;position:relative}
+.hdr-occ-dot{width:6px;height:6px;border-radius:50%;background:#FFD600;flex-shrink:0}
+
+.hdr-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;z-index:1;position:relative}
+.hdr-live{
+  display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;
+  padding:5px 9px;font-size:10px;font-weight:700;color:#fff}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;
+  animation:livePulse 2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hdr-btn{
+  width:30px;height:30px;background:rgba(255,255,255,.14);border:none;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:all .2s;color:#fff;flex-shrink:0}
+.hdr-btn:active{background:rgba(255,255,255,.28);transform:scale(.9)}
+.hdr-btn.spin{animation:iconSpin .7s linear infinite}
+@keyframes iconSpin{to{transform:rotate(360deg)}}
+.hdr-ava{
+  width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0}
+
+/* Tabs */
+.tabs-row{
+  display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;
+  padding:0 0 12px;-webkit-overflow-scrolling:touch}
+.tabs-row::-webkit-scrollbar{display:none}
+.tab{
+  padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;transition:all .18s;
+  color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);
+  border:1.5px solid rgba(255,255,255,.15)}
+.tab.on{background:#fff;color:var(--pink);border-color:#fff}
+.tab:active:not(.on){background:rgba(255,255,255,.22)}
+
+/* ══════════════════════════════════════════════════════
+   SCROLL AREA — only this scrolls
+══════════════════════════════════════════════════════ */
+#scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:10px 14px calc(var(--nav) + var(--safe) + 14px);
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch}
+#scroll::-webkit-scrollbar{display:none}
+@media(min-width:600px){
+  #scroll{padding-left:18px;padding-right:18px}
+}
+
+/* Pages */
+.pg{display:none}.pg.on{display:block}
+
+/* ══════════════════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════════════════ */
+#nav{
+  height:var(--nav);
+  background:#fff;
+  border-top:1px solid var(--bdr);
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  padding-bottom:var(--safe);
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+  box-shadow:0 -2px 14px rgba(0,0,0,.06)}
+.ni{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 4px;cursor:pointer;border:none;background:none;
+  font-family:inherit;position:relative;transition:all .2s}
+.ni-ic{font-size:21px;line-height:1;transition:transform .2s}
+.ni-lb{font-size:9px;font-weight:600;color:var(--ink3);transition:color .2s;margin-top:1px}
+.ni.on .ni-lb{color:var(--pink);font-weight:800}
+.ni.on .ni-ic{transform:translateY(-2px)}
+.ni-pip{
+  position:absolute;top:5px;right:calc(50% - 18px);
+  width:7px;height:7px;background:var(--red);border-radius:50%;
+  border:2px solid #fff;display:none}
+.ni-pip.show{display:block}
+
+/* ══════════════════════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════════════════════ */
+
+/* Status bar */
+.status-bar{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:11px;color:var(--ink3);padding:6px 0 10px}
+.s-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.s-dot.ld{background:var(--gold);animation:blink .8s ease-in-out infinite}
+.s-dot.err{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Hero band */
+.hero{
+  background:linear-gradient(135deg,var(--pink-d),var(--pink),var(--pink2));
+  border-radius:18px;padding:16px;margin-bottom:10px;
+  position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-18px;right:-18px;
+  width:80px;height:80px;background:rgba(255,255,255,.08);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-20px;right:14px;
+  width:56px;height:56px;background:rgba(255,255,255,.06);border-radius:50%}
+.h-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.h-val{font-size:30px;font-weight:800;color:#fff;font-family:'DM Mono',monospace;line-height:1}
+.h-sub{font-size:11px;color:rgba(255,255,255,.85);margin-top:7px;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.h-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:3px 9px;
+  font-weight:700;white-space:nowrap;font-size:11px}
+
+/* ── KPI GRID
+   Mobile (<400px): 1 column — each card full width
+   Mobile (400-600px): 2 columns
+   Desktop (>600px): 4 columns in a row
+*/
+.g4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+
+@media(max-width:399px){
+  .g4{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  /* Analysis 3-col cards stack to 1-col on small screens */
+  #pg-analysis .g3{grid-template-columns:1fr}
+}
+@media(min-width:600px){
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+}
+
+/* Metric card — full width, prominent */
+.mc{
+  background:var(--surf);border-radius:16px;padding:18px 16px 14px;
+  border:1px solid var(--bdr);display:flex;flex-direction:column;
+  min-height:110px;
+  transition:transform .15s,box-shadow .15s;
+  position:relative}
+.mc:active{transform:scale(.97)}
+.mc.pk{background:var(--pink-l);border-color:var(--pink-m)}
+.mc.gd{background:var(--gold-l);border-color:#FFE082}
+.mc.gr{background:var(--green-l);border-color:#A5D6A7}
+.mc.rd{background:var(--red-l);border-color:#EF9A9A}
+.mc-ic{font-size:20px;margin-bottom:6px}
+.mc-v{font-size:26px;font-weight:800;font-family:'DM Mono',monospace;color:var(--ink);line-height:1}
+.mc-l{font-size:10px;font-weight:700;color:var(--ink3);margin-top:5px;
+  text-transform:uppercase;letter-spacing:.4px;line-height:1.3}
+.mc-s{font-size:10px;color:var(--ink3);margin-top:2px;flex:1}
+/* Clickable mc — arrow hint */
+.mc.clickable{cursor:pointer}
+.mc.clickable::after{
+  content:'›';position:absolute;bottom:10px;right:12px;
+  font-size:16px;color:var(--ink3);opacity:.5;line-height:1}
+.mc.clickable:active{transform:scale(.96)}
+
+/* Card */
+.card{background:var(--surf);border-radius:14px;padding:13px;
+  margin-bottom:10px;border:1px solid var(--bdr)}
+.card-t{font-size:11px;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+
+/* Row item */
+.row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid var(--bdr)}
+.row:last-child{border-bottom:none}
+.row-l{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.row-n{font-size:13px;font-weight:600;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-r{text-align:right;flex-shrink:0;margin-left:8px}
+.row-v{font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--ink)}
+.row-m{font-size:10px;color:var(--ink3);margin-top:1px}
+
+/* Dot */
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.d-pk{background:#B5175E}.d-gd{background:#E8960C}.d-gr{background:#1B7C3A}
+.d-rd{background:#C62828}.d-gy{background:#9090AA}.d-bl{background:#1565C0}
+.d-pu{background:#6A1B9A}.d-tl{background:#0F6E56}
+
+/* Badge */
+.b{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;
+  font-size:10px;font-weight:700;white-space:nowrap}
+.b-pink,.b-pk{background:var(--pink-l);color:var(--pink)}
+.b-gold,.b-gd{background:var(--gold-l);color:var(--gold)}
+.b-green,.b-gr{background:var(--green-l);color:var(--green)}
+.b-blue,.b-bl{background:var(--blue-l);color:var(--blue)}
+.b-red,.b-rd{background:var(--red-l);color:var(--red)}
+.b-purple,.b-pu{background:var(--purp-l);color:var(--purple)}
+.b-orange,.b-or{background:var(--ora-l);color:var(--orange)}
+.b-teal,.b-tl{background:var(--teal-l);color:var(--teal)}
+.b-gray,.b-gy{background:var(--bg);color:var(--ink3)}
+
+/* ── STAGE BAR (clickable) — equal thirds ── */
+.sbar-wrap{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-radius:11px;overflow:hidden;height:36px;margin:8px 0;gap:2px}
+.sbar-seg{
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;
+  cursor:pointer;transition:filter .2s,transform .15s;
+  padding:0 8px;text-align:center}
+.sbar-seg:hover{filter:brightness(1.1)}
+.sbar-seg:active{filter:brightness(.88);transform:scale(.97)}
+.sbar-seg-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:100%;display:block}
+
+/* ── SKU STAGE PANEL ── */
+#skuPanel{
+  position:absolute;inset:0;z-index:300;background:var(--bg);
+  display:none;flex-direction:column;overflow:hidden}
+#skuPanel.show{display:flex}
+.skp-hdr{
+  background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.skp-back{
+  width:32px;height:32px;background:rgba(255,255,255,.2);border:none;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#fff;flex-shrink:0}
+.skp-title{flex:1;font-size:15px;font-weight:800;color:#fff}
+.skp-count{font-size:12px;color:rgba(255,255,255,.75);font-weight:600}
+.skp-tabs{display:flex;gap:5px;padding:10px 14px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.skp-tabs::-webkit-scrollbar{display:none}
+.skp-tab{
+  padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;transition:all .15s;
+  background:var(--surf);color:var(--ink2);border:1.5px solid var(--bdr)}
+.skp-tab.on{color:#fff;border-color:transparent}
+.skp-tab.on[data-stage="Approved"]{background:#E8960C}
+.skp-tab.on[data-stage="In Dev"]{background:#1565C0}
+.skp-tab.on[data-stage="Ready"]{background:#1B7C3A}
+.skp-tab.on[data-stage="Launched"]{background:#B5175E}
+.skp-body{flex:1;overflow-y:auto;padding:12px 14px 20px;scrollbar-width:none}
+.skp-body::-webkit-scrollbar{display:none}
+.sku-card{
+  background:var(--surf);border-radius:13px;padding:13px;
+  margin-bottom:8px;border:1px solid var(--bdr);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.sku-card-main{flex:1;min-width:0}
+.sku-card-name{font-size:13px;font-weight:700;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.sku-card-meta{font-size:11px;color:var(--ink3);display:flex;gap:7px;flex-wrap:wrap}
+
+/* ── DETAIL PANEL — generic slide-over panel ── */
+#detailPanel{
+  position:absolute;inset:0;z-index:350;background:var(--bg);
+  display:none;flex-direction:column;overflow:hidden;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.34,1.1,.64,1)}
+#detailPanel.show{display:flex;transform:translateX(0)}
+.dp-hdr{
+  padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.dp-back{
+  width:32px;height:32px;background:rgba(255,255,255,.2);border:none;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#fff;flex-shrink:0;transition:background .2s}
+.dp-back:active{background:rgba(255,255,255,.35)}
+.dp-title{flex:1;font-size:15px;font-weight:800;color:#fff}
+.dp-subtitle{font-size:11px;color:rgba(255,255,255,.7);font-weight:600}
+.dp-body{flex:1;overflow-y:auto;padding:14px 14px 24px;scrollbar-width:none}
+.dp-body::-webkit-scrollbar{display:none}
+
+/* Detail item card */
+.det-card{
+  background:var(--surf);border-radius:14px;padding:14px;
+  margin-bottom:9px;border:1px solid var(--bdr)}
+.det-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.det-card-title{font-size:13px;font-weight:800;color:var(--ink);flex:1}
+.det-card-badge{flex-shrink:0}
+.det-card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.det-card-desc{font-size:12px;color:var(--ink2);line-height:1.6;
+  background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:6px}
+.det-progress{margin-top:8px}
+.det-prog-bar{background:var(--bdr);border-radius:5px;height:7px;overflow:hidden;margin-bottom:4px}
+.det-prog-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.det-prog-row{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);font-weight:600}
+
+/* Section heading inside detail */
+.det-sec{font-size:11px;font-weight:800;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;
+  display:flex;align-items:center;gap:6px}
+.det-sec-dot{width:6px;height:6px;background:var(--pink);border-radius:50%}
+.sku-card-right{text-align:right;flex-shrink:0}
+.sku-card-dl{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;
+  color:var(--ink2);margin-bottom:3px}
+.sku-empty{text-align:center;padding:40px 20px;color:var(--ink3)}
+.sku-empty-ic{font-size:36px;margin-bottom:10px}
+.sku-empty-txt{font-size:13px;font-weight:600}
+
+/* Progress bar */
+.pb-row{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.pb-lbl{width:108px;font-size:11px;font-weight:600;color:var(--ink2);
+  flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-tr{flex:1;background:var(--bg);border-radius:5px;height:7px;overflow:hidden}
+.pb-fi{height:100%;border-radius:5px;transition:width .6s ease}
+.pb-v{width:44px;text-align:right;font-size:11px;font-weight:800;
+  font-family:'DM Mono',monospace;flex-shrink:0}
+
+/* Alert item */
+.ai{background:var(--bg);border-radius:12px;padding:11px 13px;
+  display:flex;align-items:flex-start;gap:9px;margin-bottom:8px;border:1px solid var(--bdr)}
+.ai.red{background:var(--red-l);border-color:#EF9A9A}
+.ai.amber{background:var(--gold-l);border-color:#FFE082}
+.ai.blue{background:var(--blue-l);border-color:#90CAF9}
+.ai-ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px}
+.ai-t{font-size:13px;font-weight:700;color:var(--ink)}
+.ai-d{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+
+/* Seg chip */
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-top:6px}
+.chip{background:var(--bg);border-radius:11px;padding:10px 12px;border:1px solid var(--bdr)}
+.chip-n{font-size:12px;font-weight:700;color:var(--ink)}
+.chip-s{margin-top:4px}
+
+/* Occasion card */
+.occ{background:var(--bg);border-radius:13px;padding:12px 14px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:8px;border:1px solid var(--bdr)}
+.occ-n{font-size:14px;font-weight:800;color:var(--ink)}
+.occ-s{font-size:11px;color:var(--ink3);margin-top:3px;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.occ-dl{text-align:right;flex-shrink:0;margin-left:10px}
+.occ-dv{font-size:14px;font-weight:800;font-family:'DM Mono',monospace}
+.occ-ds{font-size:10px;color:var(--ink3);margin-top:2px}
+
+/* Global overflow guard — nothing bleeds outside */
+#appWrap,#scroll,.pg,.card,.g2,.g3,.g4{max-width:100%;overflow-x:hidden}
+.row-n{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Table */
+.tw{overflow-x:auto;border-radius:10px;margin-top:4px;-webkit-overflow-scrolling:touch;max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+thead th{background:var(--pink);color:#fff;padding:8px 10px;
+  text-align:left;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+thead th:first-child{border-radius:8px 0 0 0}thead th:last-child{border-radius:0 8px 0 0}
+tbody tr:nth-child(even){background:var(--pink-l)}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle;
+  color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+
+/* Section label */
+.sl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;
+  color:var(--ink);margin:14px 0 9px}
+.sl-dot{width:7px;height:7px;background:var(--pink);border-radius:2px;flex-shrink:0}
+
+/* Skeleton */
+.skel{background:linear-gradient(90deg,var(--bdr) 25%,var(--pink-l) 50%,var(--bdr) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:7px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-v{height:22px;width:55%;margin-bottom:5px}
+.sk-l{height:9px;width:72%}
+
+/* ══════════════════════════════════════════════════════
+   DRAWER — removed, CX is now direct nav tab
+══════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════
+   USER MODAL
+══════════════════════════════════════════════════════ */
+#userModal{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:none;align-items:flex-start;justify-content:center;
+  padding:70px 16px 0;backdrop-filter:blur(3px)}
+#userModal.show{display:flex}
+.um-box{background:#fff;border-radius:20px;width:100%;max-width:320px;
+  overflow:hidden;box-shadow:0 20px 55px rgba(0,0,0,.22)}
+.um-hd{background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  padding:18px;display:flex;align-items:center;gap:12px}
+.um-av{width:44px;height:44px;background:rgba(255,255,255,.25);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
+.um-nm{font-size:15px;font-weight:800;color:#fff}
+.um-rl{font-size:11px;color:rgba(255,255,255,.7)}
+.um-body{padding:14px}
+.um-btn{width:100%;padding:12px;border-radius:12px;border:none;
+  font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.um-logout{background:var(--red-l);color:var(--red)}
+.um-close{background:var(--bg);color:var(--ink2)}
+
+/* ══════════════════════════════════════════════════════
+   SETTINGS MODAL
+══════════════════════════════════════════════════════ */
+#settingsModal{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:600;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+#settingsModal.show{opacity:1;pointer-events:all}
+.sm-box{background:#fff;border-radius:24px 24px 0 0;width:100%;
+  padding:20px 20px 36px;transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.34,1.1,.64,1)}
+#settingsModal.show .sm-box{transform:translateY(0)}
+.sm-handle{width:38px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 16px}
+.sm-title{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.sm-sub{font-size:12px;color:var(--ink3);margin-bottom:14px;line-height:1.5}
+.sm-help{background:var(--blue-l);border-radius:10px;padding:11px 12px;
+  font-size:11px;color:#0d47a1;line-height:1.7;margin-bottom:14px}
+.sm-help ol{padding-left:16px;margin-top:4px}
+.sm-help li{margin-bottom:3px}
+.sm-lbl{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:5px;display:block}
+.sm-inp{width:100%;border:1.5px solid var(--bdr);border-radius:11px;
+  padding:11px 13px;font-size:13px;font-family:inherit;color:var(--ink);
+  background:var(--bg);margin-bottom:12px;outline:none;transition:border .2s}
+.sm-inp:focus{border-color:var(--pink)}
+.sm-save{width:100%;background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;
+  font-weight:800;cursor:pointer;font-family:inherit}
+.sm-cancel{width:100%;background:transparent;color:var(--ink3);border:none;
+  padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:2px}
+
+/* FAB — fixed relative to app */
+#fab{
+  position:absolute;
+  bottom:calc(var(--nav) + var(--safe) + 14px);
+  right:14px;
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 4px 16px rgba(181,23,94,.45);z-index:50;transition:transform .2s}
+#fab:active{transform:scale(.9)}
+
+/* Loader */
+#loader{position:absolute;inset:0;background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+  z-index:8000;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;transition:opacity .4s}
+#loader.off{opacity:0;pointer-events:none}
+.ld-ic{font-size:46px;animation:bounce 1s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ld-txt{color:#fff;font-size:15px;font-weight:700}
+.ld-sub{color:rgba(255,255,255,.6);font-size:12px}
+</style>
+</head>
+<body>
+<div id="appWrap">
+
+<!-- ══ LOADER ══ -->
+<div id="loader">
+  <div class="ld-ic">✨</div>
+  <div class="ld-txt">Special You</div>
+  <div class="ld-sub" id="ldSub">Loading dashboard…</div>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginWrap">
+  <div class="lbox">
+    <div class="lbox-logo"><span>✨</span></div>
+    <div class="lbox-brand">Special You</div>
+    <div class="lbox-tag">Let Your Heart Speak · Product Team</div>
+    <div class="lf">
+      <label>Email</label>
+      <input id="lEmail" type="email" placeholder="you@specialyou.in"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lf">
+      <label>Password</label>
+      <input id="lPass" type="password" placeholder="Enter password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="l-btn" onclick="doLogin()">Sign In →</button>
+    <div class="l-err" id="lErr"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-top">
+      <div class="hdr-mark"><span>✨</span></div>
+      <div class="hdr-info">
+        <div class="hdr-brand">Special You</div>
+        <div class="hdr-sub">
+          Product Team <span class="sep">·</span>
+          <span id="hdrPeriod">Q1 FY2026</span>
+        </div>
+      </div>
+      <!-- Next upcoming occasion shown in header -->
+      <div class="hdr-occ" id="hdrOcc" style="display:none">
+        <span class="hdr-occ-dot"></span>
+        <span id="hdrOccTxt">–</span>
+      </div>
+      <div class="hdr-actions">
+        <div class="hdr-live"><span class="live-dot"></span>LIVE</div>
+        <button class="hdr-btn" id="refreshBtn" onclick="doRefresh()">🔄</button>
+        <div class="hdr-ava" id="hdrAva" onclick="openUserModal()">S</div>
+      </div>
+    </div>
+    <div class="tabs-row">
+      <div class="tab on"  onclick="showTab('bau',this)">BAU</div>
+      <div class="tab" onclick="showTab('temp',this)">TEMP / Occasions</div>
+      <div class="tab" onclick="showTab('analysis',this)">Sales & Analysis</div>
+      <div class="tab" onclick="showTab('improve',this)">Product Improvement</div>
+      <div class="tab" onclick="showTab('cx',this)">CX & Marketing</div>
+    </div>
+  </div>
+
+  <!-- SCROLL -->
+  <div id="scroll">
+
+    <div class="status-bar">
+      <span class="s-dot ld" id="sDot"></span>
+      <span id="sTxt">Connecting…</span>
+    </div>
+
+    <!-- ══ BAU PAGE ══ -->
+    <div class="pg on" id="pg-bau">
+      <div class="hero">
+        <div class="h-lbl">BAU Pipeline — At a Glance</div>
+        <div class="h-val" id="bau-total">–</div>
+        <div class="h-sub" id="bau-sub">
+          <span class="h-badge">📦 – Launched YTD</span>
+          <span class="h-badge">✅ – Ready</span>
+          <span class="h-badge">🔧 – In Dev</span>
+        </div>
+      </div>
+
+      <!-- 4 equal KPI cards -->
+      <div class="g4" id="bau-kpis">
+        <div class="mc pk"><div class="mc-ic">💡</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gd"><div class="mc-ic">🔧</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gr"><div class="mc-ic">🚀</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc"  ><div class="mc-ic">🎉</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-t">📋 Development Pipeline — Click a stage to see SKUs</div>
+        <!-- Clickable stage bar -->
+        <div class="sbar-wrap" id="bau-sbar">
+          <div class="sbar-seg" style="flex:1;background:var(--bdr)"></div>
+        </div>
+        <div id="bau-pipe-rows"></div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-t">📦 Selling SKUs by Segment</div>
+          <div id="bau-skus"></div>
+        </div>
+        <div class="card">
+          <div class="card-t">🔍 Suggested New Segments</div>
+          <div class="chips" id="bau-segs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TEMP PAGE ══ -->
+    <div class="pg" id="pg-temp">
+      <div class="hero">
+        <div class="h-lbl">TEMP / Occasions Pipeline</div>
+        <div class="h-val" id="temp-total">–</div>
+        <div class="h-sub" id="temp-sub">
+          <span class="h-badge">✅ – Ready</span>
+          <span class="h-badge" style="background:rgba(255,255,255,.28)">⚠️ – Missed</span>
+        </div>
+      </div>
+      <div class="g4" id="temp-kpis">
+        <div class="mc pk"><div class="mc-ic">💡</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gd"><div class="mc-ic">🔧</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gr"><div class="mc-ic">🚀</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc rd"><div class="mc-ic">⚠️</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-t">🌸 TEMP Pipeline — Click a stage to see SKUs</div>
+        <div class="sbar-wrap" id="temp-sbar">
+          <div class="sbar-seg" style="background:var(--bdr)"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-t">📅 Upcoming Occasions — Next 3 Months</div>
+        <div id="temp-occs"></div>
+      </div>
+      <div class="card" id="temp-missed-card" style="border-color:#EF9A9A;background:var(--red-l)">
+        <div class="card-t" style="color:var(--red)">
+          🚨 Missed Occasions &nbsp;<span class="b b-red" id="temp-missed-ct">–</span>
+        </div>
+        <div id="temp-missed"></div>
+      </div>
+      <div class="card">
+        <div class="card-t">🎁 Suggested Segments</div>
+        <div class="chips" id="temp-segs"></div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYSIS PAGE ══ -->
+    <div class="pg" id="pg-analysis">
+      <div class="hero">
+        <div class="h-lbl">Sales & Brand Analysis</div>
+        <div class="h-val" id="anl-period">–</div>
+        <div class="h-sub" id="anl-sub">
+          <span class="h-badge">📈 NPS: –</span>
+          <span class="h-badge">🔁 Repeat: –</span>
+          <span class="h-badge">✨ New SKU: –</span>
+        </div>
+      </div>
+
+      <!-- Top & Low performers — stacked, no table overflow -->
+      <div class="card">
+        <div class="card-t">🏆 Top Performers by Platform</div>
+        <div id="top-tbody"></div>
+      </div>
+      <div class="card">
+        <div class="card-t">📉 Low Performing SKUs</div>
+        <div id="low-tbody"></div>
+      </div>
+      <div class="card">
+        <div class="card-t">🔍 Top Search Terms (NPD Input)</div>
+        <div id="search-rows"></div>
+      </div>
+
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-t">📊 Brand Summary</div>
+          <div id="brand-rows"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="card-t">🏳️ Competitor Gaps</div>
+          <div class="chips" id="comp-chips"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ IMPROVEMENT PAGE ══ -->
+    <div class="pg" id="pg-improve">
+      <div class="hero">
+        <div class="h-lbl">Product Improvement Tracker</div>
+        <div class="h-val" id="imp-total">–</div>
+        <div class="h-sub" id="imp-sub">
+          <span class="h-badge">🔧 – In Improvement</span>
+          <span class="h-badge">📋 – Plan Stage</span>
+          <span class="h-badge">✅ – Closed YTD</span>
+        </div>
+      </div>
+      <div class="g4" id="imp-kpis">
+        <div class="mc"  ><div class="mc-ic">🎯</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gd"><div class="mc-ic">🔧</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc pk"><div class="mc-ic">📋</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gr"><div class="mc-ic">✅</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-t">🐛 Issue Breakdown</div>
+          <div id="imp-pb"></div>
+        </div>
+        <div class="card">
+          <div class="card-t">📋 Pipeline Deadlines</div>
+          <div id="imp-pipe"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-t">🚨 Critical Items</div>
+        <div id="imp-critical"></div>
+      </div>
+    </div>
+
+    <!-- ══ CX PAGE ══ -->
+    <div class="pg" id="pg-cx">
+      <div class="hero">
+        <div class="h-lbl">Customer Experience & Marketing</div>
+        <div class="h-val" id="cx-rating">–</div>
+        <div class="h-sub" id="cx-sub">
+          <span class="h-badge">💬 CSAT: –</span>
+          <span class="h-badge">↩️ Return: –</span>
+          <span class="h-badge" style="background:rgba(255,255,255,.28)">⚠️ 1-2★: –</span>
+        </div>
+      </div>
+      <div class="g4" id="cx-kpis">
+        <div class="mc gr"><div class="mc-ic">⭐</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc rd"><div class="mc-ic">😞</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc gd"><div class="mc-ic">😊</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+        <div class="mc pk"><div class="mc-ic">↩️</div><div class="mc-v sk-v skel"></div><div class="mc-l sk-l skel"></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-t">🗣️ Top Complaints (Open)</div>
+          <div id="cx-complaints"></div>
+        </div>
+        <div class="card">
+          <div class="card-t">📣 Marketing & Content Tasks</div>
+          <div id="cx-marketing"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- BOTTOM NAV -->
+  <div id="nav">
+    <button class="ni on" id="ni-bau" onclick="showPage('bau',this)">
+      <span class="ni-ic">🚀</span><span class="ni-lb">BAU</span>
+    </button>
+    <button class="ni" id="ni-temp" onclick="showPage('temp',this)">
+      <span class="ni-ic">🌸</span><span class="ni-lb">Occasions</span>
+      <span class="ni-pip" id="pip-temp"></span>
+    </button>
+    <button class="ni" id="ni-analysis" onclick="showPage('analysis',this)">
+      <span class="ni-ic">📈</span><span class="ni-lb">Sales</span>
+    </button>
+    <button class="ni" id="ni-improve" onclick="showPage('improve',this)">
+      <span class="ni-ic">🔧</span><span class="ni-lb">Improve</span>
+    </button>
+    <button class="ni" id="ni-cx" onclick="showPage('cx',this)">
+      <span class="ni-ic">💬</span><span class="ni-lb">CX</span>
+    </button>
+  </div>
+
+  <!-- FAB (settings only, no sheet banner at top) -->
+  <button id="fab" onclick="openSettings()" title="Setup Google Sheet">⚙️</button>
+
+  <!-- SKU Stage Panel (slides over content) -->
+  <div id="skuPanel">
+    <div class="skp-hdr">
+      <button class="skp-back" onclick="closeSkuPanel()">←</button>
+      <div class="skp-title" id="skpTitle">Pipeline SKUs</div>
+      <div class="skp-count" id="skpCount"></div>
+    </div>
+    <div class="skp-tabs" id="skpTabs"></div>
+    <div class="skp-body" id="skpBody"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div id="detailPanel">
+    <div class="dp-hdr" id="dpHdr">
+      <button class="dp-back" onclick="closeDetailPanel()">←</button>
+      <div>
+        <div class="dp-title" id="dpTitle">Details</div>
+        <div class="dp-subtitle" id="dpSubtitle"></div>
+      </div>
+    </div>
+    <div class="dp-body" id="dpBody"></div>
+  </div>
+
+  <!-- ══ PROFILE PANEL (full-screen slide-over) ══ -->
+  <div id="profilePanel" style="position:absolute;inset:0;z-index:600;background:var(--bg);
+    display:none;flex-direction:column;overflow:hidden;
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.34,1.1,.64,1)">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+      padding:16px 16px 20px;flex-shrink:0;position:relative">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="closeProfilePanel()" style="width:32px;height:32px;background:rgba(255,255,255,.2);
+          border:none;border-radius:50%;cursor:pointer;font-size:16px;color:#fff;
+          display:flex;align-items:center;justify-content:center">←</button>
+        <span style="font-size:15px;font-weight:800;color:#fff">Account & Settings</span>
+      </div>
+      <!-- Avatar row -->
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="ppAv" style="width:56px;height:56px;background:rgba(255,255,255,.25);
+          border-radius:50%;border:3px solid rgba(255,255,255,.35);
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;font-weight:800;color:#fff;flex-shrink:0">S</div>
+        <div>
+          <div id="ppName" style="font-size:17px;font-weight:800;color:#fff">–</div>
+          <div id="ppRole" style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px">–</div>
+          <div id="ppEmail" style="font-size:11px;color:rgba(255,255,255,.55);margin-top:1px">–</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div style="flex:1;min-height:0;overflow-y:auto;padding:14px;scrollbar-width:none">
+
+      <!-- Change Password -->
+      <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--bdr)">
+        <div style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;
+          letter-spacing:.5px;margin-bottom:12px">🔐 Change Password</div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;font-weight:700;color:var(--ink2);display:block;margin-bottom:4px">Current Password</label>
+          <input id="pwCurrent" type="password" placeholder="Enter current password"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;
+            font-size:13px;font-family:inherit;outline:none;background:var(--bg)">
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;font-weight:700;color:var(--ink2);display:block;margin-bottom:4px">New Password</label>
+          <input id="pwNew" type="password" placeholder="Enter new password"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;
+            font-size:13px;font-family:inherit;outline:none;background:var(--bg)">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;font-weight:700;color:var(--ink2);display:block;margin-bottom:4px">Confirm New Password</label>
+          <input id="pwConfirm" type="password" placeholder="Confirm new password"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;
+            font-size:13px;font-family:inherit;outline:none;background:var(--bg)">
+        </div>
+        <div id="pwMsg" style="font-size:12px;margin-bottom:8px;min-height:16px"></div>
+        <button onclick="changePassword()"
+          style="width:100%;padding:12px;background:linear-gradient(135deg,var(--pink-d),var(--pink2));
+          color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;
+          cursor:pointer;font-family:inherit">Update Password</button>
+      </div>
+
+      <!-- Manage Users (Admin only) -->
+      <div id="usersSection" style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--bdr)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">👥 Manage Users</div>
+          <button onclick="toggleAddUser()" style="background:var(--pink-l);color:var(--pink);
+            border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;
+            cursor:pointer;font-family:inherit">+ Add User</button>
+        </div>
+        <!-- User list -->
+        <div id="userListDiv"></div>
+        <!-- Add user form (hidden by default) -->
+        <div id="addUserForm" style="display:none;border-top:1px solid var(--bdr);margin-top:10px;padding-top:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:8px">New User Details</div>
+          <input id="nuName" placeholder="Full Name" style="width:100%;padding:9px 11px;border:1.5px solid var(--bdr);
+            border-radius:9px;font-size:13px;font-family:inherit;outline:none;
+            margin-bottom:7px;background:var(--bg)">
+          <input id="nuEmail" placeholder="Email address" type="email" style="width:100%;padding:9px 11px;
+            border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;
+            font-family:inherit;outline:none;margin-bottom:7px;background:var(--bg)">
+          <input id="nuPass" placeholder="Password" type="password" style="width:100%;padding:9px 11px;
+            border:1.5px solid var(--bdr);border-radius:9px;font-size:13px;
+            font-family:inherit;outline:none;margin-bottom:7px;background:var(--bg)">
+          <select id="nuRole" style="width:100%;padding:9px 11px;border:1.5px solid var(--bdr);
+            border-radius:9px;font-size:13px;font-family:inherit;outline:none;
+            margin-bottom:10px;background:var(--bg)">
+            <option value="Viewer">Viewer</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <div id="nuMsg" style="font-size:11px;margin-bottom:7px;min-height:14px"></div>
+          <div style="display:flex;gap:8px">
+            <button onclick="addNewUser()" style="flex:1;padding:10px;background:var(--green);
+              color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;
+              cursor:pointer;font-family:inherit">Add User</button>
+            <button onclick="toggleAddUser()" style="flex:1;padding:10px;background:var(--bg);
+              color:var(--ink2);border:1px solid var(--bdr);border-radius:9px;font-size:13px;
+              font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Sheets -->
+      <div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--bdr)">
+        <div style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;
+          letter-spacing:.5px;margin-bottom:12px">🔗 Google Sheets Connection</div>
+
+        <!-- Connected state -->
+        <div id="sheetConnectedView" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--green-l);
+            border:1px solid #A5D6A7;border-radius:10px;padding:12px;margin-bottom:10px">
+            <span style="font-size:20px">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--green)">Connected</div>
+              <div style="font-size:11px;color:var(--green);opacity:.8;margin-top:1px">Live data syncing from Google Sheets</div>
+            </div>
+          </div>
+          <button onclick="showSheetInput()"
+            style="width:100%;padding:10px;background:var(--bg);color:var(--ink2);
+            border:1px solid var(--bdr);border-radius:10px;font-size:13px;font-weight:600;
+            cursor:pointer;font-family:inherit;margin-bottom:6px">🔄 Update Connection</button>
+          <button onclick="clearSheetUrl()"
+            style="width:100%;padding:10px;background:transparent;color:var(--red);border:none;
+            font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+            Disconnect Sheet</button>
+        </div>
+
+        <!-- Disconnected / input state -->
+        <div id="sheetInputView">
+          <div style="background:var(--blue-l);border-radius:10px;padding:10px 12px;
+            font-size:11px;color:#0d47a1;line-height:1.7;margin-bottom:12px">
+            <strong>How to connect:</strong><br>
+            1. Upload the Excel template to Google Sheets<br>
+            2. Go to <strong>Extensions → Apps Script</strong><br>
+            3. Paste <strong>Code.gs</strong> → Save → <strong>Deploy → Web App</strong><br>
+            4. Execute as: <em>Me</em> · Access: <em>Anyone</em><br>
+            5. Copy the URL and paste below
+          </div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink2);display:block;margin-bottom:5px">Web App URL</label>
+          <input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/…/exec"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:10px;
+            font-size:12px;font-family:'DM Mono',monospace;outline:none;background:var(--bg);
+            margin-bottom:10px">
+          <div id="sheetConnStatus" style="font-size:11px;margin-bottom:8px;min-height:14px"></div>
+          <button onclick="saveSheetUrl()"
+            style="width:100%;padding:12px;background:linear-gradient(135deg,var(--blue),#1976D2);
+            color:#fff;border:none;border-radius:11px;font-size:14px;font-weight:700;
+            cursor:pointer;font-family:inherit">💾 Save & Connect</button>
+        </div>
+      </div>
+
+      <!-- Sign Out -->
+      <button onclick="doLogout()"
+        style="width:100%;padding:14px;background:var(--red-l);color:var(--red);
+        border:1px solid #EF9A9A;border-radius:14px;font-size:14px;font-weight:700;
+        cursor:pointer;font-family:inherit;margin-bottom:24px">
+        🚪 Sign Out
+      </button>
+
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+</div><!-- /appWrap -->
+
+<script>
+// ════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════
+const USERS=[
+  {email:'admin@specialyou.in',pass:'admin123',name:'Admin',role:'Admin'},
+  {email:'sheetal@specialyou.in',pass:'sheetal123',name:'Sheetal',role:'Manager'},
+  {email:'cherry@specialyou.in',pass:'cherry123',name:'Cherry',role:'Manager'},
+  {email:'sunny@specialyou.in',pass:'sunny123',name:'Sunny',role:'Viewer'},
+  {email:'demo@specialyou.in',pass:'demo123',name:'Demo User',role:'Viewer'},
+];
+const getSess=()=>{try{return JSON.parse(localStorage.getItem('sy_sess'))}catch{return null}};
+const setSess=u=>localStorage.setItem('sy_sess',JSON.stringify(u));
+const clrSess=()=>localStorage.removeItem('sy_sess');
+
+function doLogout(){clrSess();location.reload();}
+
+function startApp(u){
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('app').classList.add('show');
+  const ini=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('hdrAva').textContent=ini;
+  // profile panel fields set on open
+  loadData();
+}
+
+// ════════════════════════════════════════════════
+// DATA CONFIG
+// ════════════════════════════════════════════════
+const SK='sy_sheet_url';
+let SHEET_URL=localStorage.getItem(SK)||'https://script.google.com/macros/s/AKfycbxDO9qV19oSACpuR4IRMHmwitDRZ6g4jv3AxHxoJH--4p4kJuLu-KSxBTwpGeIPHuwb7A/exec';
+let DATA=null;
+
+// ════════════════════════════════════════════════
+// DEMO DATA
+// ════════════════════════════════════════════════
+const DEMO={
+  meta:{period:'Q1 FY2026',updated:new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})},
+  bau:{
+    total:30,launched_ytd:19,ready:3,in_dev:8,ideas_approved:14,
+    brief_deadline:'Apr 10',in_dev_deadline:'Apr 28',ready_deadline:'Apr 1 / Apr 15',
+    skus:[
+      {segment:'Birthday Decor',active:42,dead:6,color:'d-pk'},
+      {segment:'Party Supplies',active:31,dead:2,color:'d-pu'},
+      {segment:'Wedding Decor',active:18,dead:4,color:'d-tl'},
+      {segment:'Gifting',active:11,dead:1,color:'d-gd'}
+    ],
+    total_active:102,total_incl_dead:115,
+    suggested_segments:[
+      {name:'Rakhi Combo Kits',badge:'b-red',label:'Missing'},
+      {name:'Luxury Welcome Kit',badge:'b-gold',label:'Competitor'},
+      {name:'Memory Wall Kit',badge:'b-blue',label:'Demanded'},
+      {name:'Name Banners',badge:'b-gold',label:'Competitor'},
+      {name:'Neon LED Flex',badge:'b-red',label:'Missing'},
+      {name:'Kids Room Bundle',badge:'b-blue',label:'Demanded'}
+    ],
+    // SKU stage data for the click panel
+    pipeline_items:[
+      {name:'Pearl Bow Banner',brand:'Special You',seg:'Home Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-04-10',owner:'Sheetal',priority:'🔴 High'},
+      {name:'Dried Flower Bouquet',brand:'Special You',seg:'Gifting',type:'BAU',stage:'Ideas Approved',deadline:'2026-04-15',owner:'Sheetal',priority:'🔴 High'},
+      {name:'Small Crochet Flower',brand:'Special You',seg:'Gifting',type:'BAU',stage:'Ideas Approved',deadline:'2026-04-20',owner:'Sheetal',priority:'🟠 Medium'},
+      {name:'Dried Flower Vase',brand:'Special You',seg:'Gifting',type:'BAU',stage:'Ideas Approved',deadline:'2026-05-01',owner:'Cherry',priority:'🟠 Medium'},
+      {name:'Rakhi Combo Kit',brand:'Special You',seg:'Gifting',type:'BAU',stage:'Ideas Approved',deadline:'2026-06-01',owner:'Sheetal',priority:'🔴 High'},
+      {name:'Luxury Wedding Welcome Kit',brand:'Special You',seg:'Wedding Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-05-15',owner:'Cherry',priority:'🔴 High'},
+      {name:'Kids Room Decor Bundle',brand:'Special You',seg:'Home Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-06-30',owner:'Cherry',priority:'🟡 Low'},
+      {name:'Neon Sign LED Flex',brand:'Special You',seg:'Home Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-07-15',owner:'Cherry',priority:'🟠 Medium'},
+      {name:'Personalised Name Banners',brand:'Special You',seg:'Birthday Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-04-25',owner:'Sheetal',priority:'🟠 Medium'},
+      {name:'Photo Wall Memory Kit',brand:'Special You',seg:'Home Decor',type:'BAU',stage:'Ideas Approved',deadline:'2026-04-10',owner:'Cherry',priority:'🟠 Medium'},
+      {name:'Sy-MediumKite-Light-4',brand:'Special You',seg:'Party Supplies',type:'BAU',stage:'In Development',deadline:'2026-04-28',owner:'Sunny',priority:'🔴 High'},
+      {name:'SY-AVENGERS-71',brand:'Special You',seg:'Birthday Decor',type:'BAU',stage:'In Development',deadline:'2026-04-28',owner:'Cherry',priority:'🔴 High'},
+      {name:'Sy-TriHairclip-6',brand:'Special You',seg:'Party Supplies',type:'BAU',stage:'In Development',deadline:'2026-04-30',owner:'Sheetal',priority:'🟠 Medium'},
+      {name:'Sy-RectangularStand-01',brand:'Special You',seg:'Party Supplies',type:'BAU',stage:'In Development',deadline:'2026-05-15',owner:'Sunny',priority:'🟡 Low'},
+      {name:'SY-PastelBday-57',brand:'Special You',seg:'Birthday Decor',type:'BAU',stage:'In Development',deadline:'2026-04-20',owner:'Cherry',priority:'🟠 Medium'},
+      {name:'Navratri Dandiya Bundle',brand:'Special You',seg:'Seasonal',type:'TEMP',stage:'In Development',deadline:'2026-08-15',owner:'Sunny',priority:'🟠 Medium'},
+      {name:'Eid Mubarak Premium Decor',brand:'Special You',seg:'Seasonal',type:'TEMP',stage:'In Development',deadline:'2026-03-01',owner:'Sunny',priority:'🟠 Medium'},
+      {name:'SY-WelcomeDoor-33',brand:'Special You',seg:'Welcome Decor',type:'BAU',stage:'Ready to Launch',deadline:'2026-04-01',owner:'Sheetal',priority:'🔴 High'},
+      {name:'Sy-PaperKandil-1',brand:'Special You',seg:'Diwali Decor',type:'TEMP',stage:'Ready to Launch',deadline:'2026-04-15',owner:'Cherry',priority:'🟠 Medium'},
+      {name:'SY-NewYearHanging-10',brand:'Special You',seg:'New Year Decor',type:'TEMP',stage:'Ready to Launch',deadline:'2026-04-01',owner:'Sunny',priority:'🟠 Medium'},
+    ]
+  },
+  temp:{
+    total:14,ready:2,missed:2,ideas_approved:7,in_dev:5,
+    occasions:[
+      {name:'Eid-ul-Adha',date:'Jun 6',type:'Big Occasion',type_badge:'b-gold',deadline:'Apr 22',deadline_days:'45d prior',dl_color:'var(--gold)'},
+      {name:"Mother's Day",date:'May 11',type:'Standard',type_badge:'b-blue',deadline:'Apr 26',deadline_days:'15d prior',dl_color:'var(--blue)'},
+      {name:"Father's Day",date:'Jun 15',type:'Standard',type_badge:'b-blue',deadline:'Jun 1',deadline_days:'15d prior',dl_color:'var(--blue)'},
+      {name:'Independence Day',date:'Aug 15',type:'Big Occasion',type_badge:'b-gold',deadline:'Jul 1',deadline_days:'45d prior',dl_color:'var(--gold)'}
+    ],
+    missed_occasions:[
+      {name:'Holi',date:'Mar 14',note:'missed window',days_ago:10},
+      {name:"International Women's Day",date:'Mar 8',note:'missed window',days_ago:16}
+    ],
+    suggested_segments:[
+      {name:'Karwa Chauth Kit',badge:'b-red',label:'Urgent'},
+      {name:'Navratri Bundle',badge:'b-gold',label:'Competitor'},
+      {name:'Eid Decor Premium',badge:'b-blue',label:'Demanded'},
+      {name:'Pongal Kit',badge:'b-gray',label:'Plan'}
+    ]
+  },
+  analysis:{
+    period:'Q1 FY26',nps_brand_a:72,nps_brand_b:58,
+    repeat_rate:'34%',new_sku_contribution:'18%',
+    top_performers:[
+      {sku:'Sy-MediumKite-Light-4',platform:'Amazon',trend:'Top 3',badge:'b-green'},
+      {sku:'Sy-TriHairclip-6',platform:'Flipkart',trend:'Top 5',badge:'b-green'},
+      {sku:'SY-AVENGERS-71',platform:'Amazon',trend:'Rising',badge:'b-teal'},
+      {sku:'Sy-PastelBday-57',platform:'Meesho',trend:'Top 10',badge:'b-green'}
+    ],
+    low_performers:[
+      {sku:'Sy-PaperKandil-1',platform:'Amazon',issue:'Low CTR',badge:'b-red'},
+      {sku:'SY-GlitterSet-4',platform:'Nykaa',issue:'Low Conv.',badge:'b-gold'},
+      {sku:'Sy-TriHairclip-6',platform:'All',issue:'Returns ↑',badge:'b-red'},
+      {sku:'Sy-RectangularStand',platform:'Amazon',issue:'No Traffic',badge:'b-gray'}
+    ],
+    search_terms:[
+      {term:'"party decoration under 500"',status:'Unmet',badge:'b-red'},
+      {term:'"birthday banner personalised"',status:'Partial',badge:'b-gold'},
+      {term:'"wedding welcome kit"',status:'Unmet',badge:'b-red'},
+      {term:'"kite flying set kids"',status:'Covered',badge:'b-blue'},
+      {term:'"diwali lights decoration"',status:'Partial',badge:'b-gold'}
+    ],
+    competitor_gaps:[
+      {name:'K-beauty Dupes',badge:'b-gold',label:'Competitor'},
+      {name:'Glass Skin Range',badge:'b-blue',label:'Demanded'},
+      {name:'Ayurvedic SPF',badge:'b-red',label:'Missing'},
+      {name:'Scalp Scrub',badge:'b-gold',label:'Competitor'}
+    ]
+  },
+  improvement:{
+    total:142,in_improvement:38,plan_stage:67,closed_ytd:37,
+    issues_by_type:[
+      {label:'Packaging',count:20,max:50,color:'var(--red)'},
+      {label:'Images / Listing',count:50,max:50,color:'var(--gold)'},
+      {label:'Low-quality RM',count:16,max:50,color:'var(--blue)'},
+      {label:'Formula / Efficacy',count:14,max:50,color:'var(--purple)'},
+      {label:'Label / Compliance',count:11,max:50,color:'var(--ink3)'}
+    ],
+    pipeline:[
+      {stage:'Plan',skus:67,deadline:'Prioritisation: Apr 5',dot:'d-gy'},
+      {stage:'In Development',skus:38,deadline:'Review: Apr 20',dot:'d-bl'},
+      {stage:'Closure',skus:37,deadline:'Closed YTD',dot:'d-gr'}
+    ],
+    critical_items:[
+      {level:'red',title:'Packaging — Kite Box',desc:'Kite frame punctures poly bag — 12% return rate on Amazon. Brief sent.'},
+      {level:'amber',title:'Colors Fading — Avengers Banner',desc:'23 reviews: color fading in 2 weeks. Vendor switch in progress.'},
+      {level:'blue',title:'Assembly — Kandil Instructions',desc:'QR code instruction card added. New batch shipping Mar 15.'}
+    ]
+  },
+  cx:{
+    avg_rating:'3.9 ★',csat:'68%',return_rate:'4.2%',low_star:'12%',rating_num:'3.9',
+    complaints:[
+      {issue:'Wrong product delivered',count:'38 tickets',badge:'b-red'},
+      {issue:'Packaging damaged in transit',count:'21 tickets',badge:'b-red'},
+      {issue:'Product not as described',count:'17 tickets',badge:'b-gold'},
+      {issue:'Missing items in order',count:'12 tickets',badge:'b-gold'},
+      {issue:'Expiry date concerns',count:'9 tickets',badge:'b-gray'}
+    ],
+    marketing:[
+      {task:'A+ content refresh due',value:'14 SKUs',badge:'b-gold'},
+      {task:'Influencer brief — Eid',value:'Apr 5',badge:'b-blue'},
+      {task:'Video shoots pending',value:'8 SKUs',badge:'b-gold'},
+      {task:'Platform banners — Q2',value:'Apr 1',badge:'b-blue'},
+      {task:'Review response backlog',value:'62 reviews',badge:'b-red'}
+    ]
+  }
+};
+
+// ════════════════════════════════════════════════
+// DATA ADAPTER — maps live Google Sheet payload
+//               OR demo data to dashboard format
+// ════════════════════════════════════════════════
+function adaptData(raw){
+  // If raw has 'bau' key → it's already demo format, return as-is
+  if(raw.bau) return raw;
+
+  // ── Build BAU section from bauPipeline + catalog ──────────────
+  const bp    = raw.bauPipeline || {};
+  const bauSt = bp.bau  || {};
+  const tmpSt = bp.temp || {};
+  const allItems = bp.items || [];
+
+  // Catalog segment breakdown
+  const catalog = raw.catalog || [];
+  const segMap  = {};
+  catalog.filter(c=>c.type==='BAU').forEach(c=>{
+    if(!segMap[c.seg]) segMap[c.seg]={segment:c.seg,active:0,dead:0,color:'d-pk'};
+    segMap[c.seg].active++;
+  });
+  const segColors=['d-pk','d-pu','d-tl','d-gd','d-bl','d-gr'];
+  const skuList = Object.values(segMap).map((s,i)=>({...s,color:segColors[i%segColors.length]}));
+  const totalActive = skuList.reduce((a,s)=>a+s.active,0);
+
+  // ── Upcoming occasions from occ list ─────────────────────────
+  const today = new Date();
+  const occs  = (raw.occ||[])
+    .map(o=>({...o, dateObj: new Date(o.d)}))
+    .filter(o=>o.dateObj > today)
+    .sort((a,b)=>a.dateObj-b.dateObj);
+
+  const upcomingOccs = occs.slice(0,6).map(o=>{
+    const daysUntil = Math.ceil((o.dateObj-today)/(1000*60*60*24));
+    const alertDays = o.type==='Big' ? 90 : 45;
+    const dlDate    = new Date(o.dateObj); dlDate.setDate(dlDate.getDate()-alertDays);
+    const dlStr     = dlDate.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    const dateStr   = o.dateObj.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return {
+      name:o.n, date:dateStr, type:o.type==='Big'?'Big Occasion':'Standard',
+      type_badge:o.type==='Big'?'b-gold':'b-blue',
+      deadline:dlStr, deadline_days:alertDays+'d prior',
+      dl_color:o.type==='Big'?'var(--gold)':'var(--blue)',
+    };
+  });
+
+  // ── Improvement section from improvement data ─────────────────
+  const imp = raw.improvement || {};
+  const impItems = imp.items || [];
+
+  // ── CX from cx data ───────────────────────────────────────────
+  const cx = raw.cx || {};
+  const complaints = (cx.complaints||[]).map(c=>({
+    issue:c.issue, count:c.count+' tickets',
+    badge: c.status==='Open'?'b-red': c.status==='In Progress'?'b-gold':'b-green'
+  }));
+  const marketing = (cx.mkt||[]).map(m=>({
+    task:m.title, value:m.status,
+    badge: m.status==='Active'?'b-green': m.status==='In Progress'?'b-blue':'b-gold'
+  }));
+  const feedback  = cx.feedback || [];
+  const avgRating = feedback.length
+    ? (feedback.reduce((s,f)=>s+(Number(f.stars)||0),0)/feedback.length).toFixed(1)
+    : '–';
+
+  // ── Sales analysis from platRows/brandRows ────────────────────
+  const platRows  = raw.platRows || [];
+  const brandRows = raw.brandRows || [];
+  const months    = [...new Set(platRows.map(r=>r.year+'-'+r.month))].sort();
+  const lastPeriod= months[months.length-1]||'';
+  const [ly,lm]   = (lastPeriod||'2026-Jan').split('-');
+  const npsA      = 72; // from meta if available
+  const npsB      = 58;
+
+  // Top SKUs from skuRows
+  const skuRows = raw.skuRows || [];
+  const skuMap  = {};
+  skuRows.filter(r=>String(r.year)+'-'+r.month===lastPeriod).forEach(r=>{
+    skuMap[r.sku] = (skuMap[r.sku]||0) + (Number(r.qty)||0);
+  });
+  const sortedSKUs = Object.entries(skuMap).sort((a,b)=>b[1]-a[1]);
+  const topPerf = sortedSKUs.slice(0,4).map(([sku,qty],i)=>{
+    const plat = (skuRows.find(r=>r.sku===sku)||{});
+    return {sku, platform:plat.seg||'Platform', trend:i===0?'Top 3':i===1?'Top 5':'Rising', badge:i<2?'b-green':'b-teal'};
+  });
+  const lowPerf = sortedSKUs.slice(-4).reverse().map(([sku])=>({
+    sku, platform:'All', issue:'Low Sales', badge:'b-red'
+  }));
+
+  // ── Segment intelligence ──────────────────────────────────────
+  const segIntel = raw.segIntel || {bau:[],temp:[]};
+
+  // ── Assemble final payload ─────────────────────────────────────
+  return {
+    meta: raw.meta || {},
+    bau: {
+      total: (bauSt.total||0),
+      launched_ytd: (bauSt.launched_ytd||0),
+      ready:        (bauSt.ready||0),
+      in_dev:       (bauSt.in_dev||0),
+      ideas_approved:(bauSt.ideas_approved||0),
+      brief_deadline: bauSt.next_deadline || '—',
+      in_dev_deadline:'—',
+      ready_deadline: '—',
+      skus:         skuList,
+      total_active: totalActive,
+      total_incl_dead: catalog.length,
+      suggested_segments: (segIntel.bau||[]).slice(0,6).map(s=>({
+        name:s.name, badge:'b-'+(s.priority.includes('Urgent')?'red':s.priority.includes('Soon')?'gold':'blue'),
+        label:s.priority.replace(/🔴 |🟠 |🟡 /,'')
+      })),
+      pipeline_items: allItems,
+    },
+    temp: {
+      total: tmpSt.total||0,
+      ready: tmpSt.ready||0,
+      missed: 0,
+      ideas_approved: tmpSt.ideas_approved||0,
+      in_dev: tmpSt.in_dev||0,
+      occasions: upcomingOccs,
+      missed_occasions: [],
+      suggested_segments: (segIntel.temp||[]).slice(0,4).map(s=>({
+        name:s.name, badge:'b-'+(s.priority.includes('Urgent')?'red':s.priority.includes('Soon')?'gold':'blue'),
+        label:s.priority.replace(/🔴 |🟠 |🟡 /,'')
+      })),
+    },
+    analysis: {
+      period: lm+' '+ly,
+      nps_brand_a: npsA, nps_brand_b: npsB,
+      repeat_rate:'—', new_sku_contribution:'—',
+      top_performers: topPerf.length?topPerf:[{sku:'No data',platform:'—',trend:'—',badge:'b-gray'}],
+      low_performers: lowPerf.length?lowPerf:[{sku:'No data',platform:'—',issue:'—',badge:'b-gray'}],
+      search_terms:[],
+      competitor_gaps:(segIntel.bau||[]).slice(0,4).map(s=>({
+        name:s.name, badge:'b-gold', label:'Gap'
+      })),
+    },
+    improvement: {
+      total:          impItems.length || imp.total || 0,
+      in_improvement: imp.in_improvement || 0,
+      plan_stage:     imp.plan_stage     || 0,
+      closed_ytd:     imp.closed_ytd     || 0,
+      issues_by_type: imp.issues_by_type || [],
+      pipeline:       imp.pipeline       || [],
+      critical_items: imp.critical_items || [],
+      items:          impItems,
+    },
+    cx: {
+      avg_rating: avgRating+' ★',
+      rating_num: avgRating,
+      csat:       '—',
+      return_rate:'—',
+      low_star:   feedback.length ? (feedback.filter(f=>f.stars<=2).length/feedback.length*100).toFixed(0)+'%' : '—',
+      complaints: complaints.slice(0,6),
+      marketing:  marketing.slice(0,6),
+    },
+  };
+}
+
+// ════════════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════════════
+function renderAll(raw){
+  const d = adaptData(raw);
+  DATA = d;
+  DATA._raw = raw; // keep original for SKU panel
+  renderBAU(d.bau);
+  renderTemp(d.temp);
+  renderAnalysis(d.analysis);
+  renderImprovement(d.improvement);
+  renderCX(d.cx);
+  document.getElementById('hdrPeriod').textContent = d.meta?.period || 'Q1 FY2026';
+  // Next upcoming occasion in header
+  if(d.temp?.occasions?.length){
+    const next = d.temp.occasions[0];
+    document.getElementById('hdrOcc').style.display='flex';
+    document.getElementById('hdrOccTxt').textContent = next.name+' · '+next.deadline;
+  }
+  // Missed pip badge
+  if((d.temp?.missed_occasions?.length||0)>0)
+    document.getElementById('pip-temp').classList.add('show');
+}
+
+// ── BAU ──────────────────────────────────────────
+function renderBAU(b){
+  if(!b)return;
+  document.getElementById('bau-total').textContent=b.total;
+  document.getElementById('bau-sub').innerHTML=`
+    <span class="h-badge">📦 ${b.launched_ytd} Launched YTD</span>
+    <span class="h-badge">✅ ${b.ready} Ready</span>
+    <span class="h-badge">🔧 ${b.in_dev} In Dev</span>`;
+
+  // KPI cards — equal size
+  document.getElementById('bau-kpis').innerHTML=`
+    <div class="mc pk"><div class="mc-ic">💡</div><div class="mc-v">${b.ideas_approved}</div><div class="mc-l">Ideas Approved</div><div class="mc-s">Awaiting dev</div></div>
+    <div class="mc gd"><div class="mc-ic">🔧</div><div class="mc-v">${b.in_dev}</div><div class="mc-l">In Development</div><div class="mc-s">Active builds</div></div>
+    <div class="mc gr"><div class="mc-ic">🚀</div><div class="mc-v">${b.ready}</div><div class="mc-l">Ready to Launch</div><div class="mc-s">Pending go-live</div></div>
+    <div class="mc"><div class="mc-ic">🎉</div><div class="mc-v">${b.launched_ytd}</div><div class="mc-l">Launched YTD</div><div class="mc-s">This fiscal year</div></div>`;
+
+  // Clickable stage bar — equal thirds via CSS grid — BAU only
+  const items=b.pipeline_items||[];
+  const approved=items.filter(i=>i.stage==='Ideas Approved'&&i.type==='BAU').length||b.ideas_approved;
+  const indev   =items.filter(i=>i.stage==='In Development'&&i.type==='BAU').length||b.in_dev;
+  const ready   =items.filter(i=>i.stage==='Ready to Launch'&&i.type==='BAU').length||b.ready;
+  document.getElementById('bau-sbar').innerHTML=`
+    <div class="sbar-seg" style="background:#E8960C" onclick="openSkuPanel('Ideas Approved','BAU')">
+      <span class="sbar-seg-label">Approved (${approved})</span>
+    </div>
+    <div class="sbar-seg" style="background:#1565C0" onclick="openSkuPanel('In Development','BAU')">
+      <span class="sbar-seg-label">In Dev (${indev})</span>
+    </div>
+    <div class="sbar-seg" style="background:#1B7C3A" onclick="openSkuPanel('Ready to Launch','BAU')">
+      <span class="sbar-seg-label">Ready (${ready})</span>
+    </div>`;
+
+  // Pipeline rows — also clickable
+  document.getElementById('bau-pipe-rows').innerHTML=`
+    <div class="row" style="cursor:pointer" onclick="openSkuPanel('Ideas Approved','BAU')">
+      <div class="row-l"><span class="dot d-gd"></span><span class="row-n">Approved</span></div>
+      <div class="row-r"><div class="row-v">${approved} SKUs</div><div class="row-m">Brief due: ${b.brief_deadline} · Tap to view →</div></div>
+    </div>
+    <div class="row" style="cursor:pointer" onclick="openSkuPanel('In Development','BAU')">
+      <div class="row-l"><span class="dot d-bl"></span><span class="row-n">In Development</span></div>
+      <div class="row-r"><div class="row-v">${indev} SKUs</div><div class="row-m">Sample review: ${b.in_dev_deadline} · Tap to view →</div></div>
+    </div>
+    <div class="row" style="cursor:pointer" onclick="openSkuPanel('Ready to Launch','BAU')">
+      <div class="row-l"><span class="dot d-gr"></span><span class="row-n">Ready for Launch</span></div>
+      <div class="row-r"><div class="row-v">${ready} SKUs</div><div class="row-m">Go-live: ${b.ready_deadline} · Tap to view →</div></div>
+    </div>`;
+
+  // SKU rows
+  document.getElementById('bau-skus').innerHTML=b.skus.map(s=>`
+    <div class="row">
+      <div class="row-l"><span class="dot ${s.color}"></span><span class="row-n">${s.segment}</span></div>
+      <div class="row-r"><div class="row-v">${s.active}</div><div class="row-m">+${s.dead} dead</div></div>
+    </div>`).join('')+`
+    <div class="row" style="margin-top:6px;border-top:1.5px solid var(--pink-m);padding-top:9px">
+      <div class="row-l"><span class="row-n" style="font-weight:800;color:var(--green)">Total active</span></div>
+      <div class="row-v" style="color:var(--green)">${b.total_active}</div>
+    </div>
+    <div class="row">
+      <div class="row-l"><span class="row-n" style="color:var(--ink3)">Total incl. dead</span></div>
+      <div class="row-v" style="color:var(--ink3)">${b.total_incl_dead}</div>
+    </div>`;
+
+  document.getElementById('bau-segs').innerHTML=b.suggested_segments.map(s=>
+    `<div class="chip"><div class="chip-n">${s.name}</div><div class="chip-s"><span class="b ${s.badge}">${s.label}</span></div></div>`
+  ).join('');
+}
+
+// ── TEMP ─────────────────────────────────────────
+function renderTemp(t){
+  if(!t)return;
+  document.getElementById('temp-total').textContent=t.total;
+  document.getElementById('temp-sub').innerHTML=`
+    <span class="h-badge">✅ ${t.ready} Ready to Launch</span>
+    <span class="h-badge" style="background:rgba(255,255,255,.28)">⚠️ ${t.missed} Missed</span>`;
+  document.getElementById('temp-kpis').innerHTML=`
+    <div class="mc pk"><div class="mc-ic">💡</div><div class="mc-v">${t.ideas_approved}</div><div class="mc-l">Ideas Approved</div><div class="mc-s">Occasion-specific</div></div>
+    <div class="mc gd"><div class="mc-ic">🔧</div><div class="mc-v">${t.in_dev}</div><div class="mc-l">In Development</div><div class="mc-s">Active builds</div></div>
+    <div class="mc gr"><div class="mc-ic">🚀</div><div class="mc-v">${t.ready}</div><div class="mc-l">Ready to Launch</div><div class="mc-s">Pending go-live</div></div>
+    <div class="mc rd"><div class="mc-ic">⚠️</div><div class="mc-v">${t.missed}</div><div class="mc-l">Missed Occasions</div><div class="mc-s">Action needed</div></div>`;
+
+  // TEMP stage bar — same as BAU but filtered for TEMP
+  const tempItems = (DATA?.bau?.pipeline_items||[]).filter(i=>i.type==='TEMP');
+  const tApproved = tempItems.filter(i=>i.stage==='Ideas Approved').length || t.ideas_approved;
+  const tIndev    = tempItems.filter(i=>i.stage==='In Development').length || t.in_dev;
+  const tReady    = tempItems.filter(i=>i.stage==='Ready to Launch').length || t.ready;
+  document.getElementById('temp-sbar').innerHTML=`
+    <div class="sbar-seg" style="background:#E8960C" onclick="openSkuPanel('Ideas Approved','TEMP')">
+      <span class="sbar-seg-label">Approved (${tApproved})</span>
+    </div>
+    <div class="sbar-seg" style="background:#1565C0" onclick="openSkuPanel('In Development','TEMP')">
+      <span class="sbar-seg-label">In Dev (${tIndev})</span>
+    </div>
+    <div class="sbar-seg" style="background:#1B7C3A" onclick="openSkuPanel('Ready to Launch','TEMP')">
+      <span class="sbar-seg-label">Ready (${tReady})</span>
+    </div>`;
+
+  document.getElementById('temp-occs').innerHTML=t.occasions.map(o=>`
+    <div class="occ">
+      <div>
+        <div class="occ-n">${o.name}</div>
+        <div class="occ-s">${o.date}&nbsp;<span class="b ${o.type_badge}">${o.type}</span></div>
+      </div>
+      <div class="occ-dl">
+        <div class="occ-dv" style="color:${o.dl_color}">${o.deadline}</div>
+        <div class="occ-ds">FC Deadline · ${o.deadline_days}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('temp-missed-ct').textContent=`${t.missed_occasions.length} occasions`;
+  document.getElementById('temp-missed').innerHTML=t.missed_occasions.map(m=>`
+    <div class="row">
+      <div class="row-l"><span class="dot d-gy"></span><span class="row-n">${m.name}</span>
+      <span style="font-size:10px;color:var(--ink3);margin-left:6px">${m.date}</span></div>
+      <span class="b b-gray">Passed ${m.days_ago}d ago</span>
+    </div>`).join('');
+  document.getElementById('temp-segs').innerHTML=t.suggested_segments.map(s=>
+    `<div class="chip"><div class="chip-n">${s.name}</div><div class="chip-s"><span class="b ${s.badge}">${s.label}</span></div></div>`
+  ).join('');
+}
+
+// ── ANALYSIS ─────────────────────────────────────
+function renderAnalysis(a){
+  if(!a)return;
+  document.getElementById('anl-period').textContent=a.period;
+  document.getElementById('anl-sub').innerHTML=`
+    <span class="h-badge">📈 NPS: Brand A ${a.nps_brand_a}</span>
+    <span class="h-badge">🔁 Repeat: ${a.repeat_rate}</span>
+    <span class="h-badge">✨ New SKU: ${a.new_sku_contribution}</span>`;
+
+  // Top performers — row layout (no table, no overflow)
+  document.getElementById('top-tbody').innerHTML=a.top_performers.map(r=>`
+    <div class="row">
+      <div class="row-l" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <span class="row-n">${r.sku}</span>
+        <span style="font-size:10px;color:var(--ink3)">${r.platform}</span>
+      </div>
+      <span class="b ${r.badge}">${r.trend}</span>
+    </div>`).join('');
+
+  // Low performers — row layout
+  document.getElementById('low-tbody').innerHTML=a.low_performers.map(r=>`
+    <div class="row">
+      <div class="row-l" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <span class="row-n">${r.sku}</span>
+        <span style="font-size:10px;color:var(--ink3)">${r.platform}</span>
+      </div>
+      <span class="b ${r.badge}">${r.issue}</span>
+    </div>`).join('');
+
+  document.getElementById('search-rows').innerHTML=a.search_terms.map(s=>`
+    <div class="row">
+      <div class="row-l" style="font-size:12px;font-style:italic;color:var(--ink2);min-width:0">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;width:100%">${s.term}</span>
+      </div>
+      <span class="b ${s.badge}" style="flex-shrink:0;margin-left:8px">${s.status}</span>
+    </div>`).join('');
+
+  document.getElementById('brand-rows').innerHTML=`
+    <div class="row"><div class="row-n">Brand A NPS</div><div class="row-v" style="color:var(--green)">${a.nps_brand_a}</div></div>
+    <div class="row"><div class="row-n">Brand B NPS</div><div class="row-v" style="color:var(--gold)">${a.nps_brand_b}</div></div>
+    <div class="row"><div class="row-n">Repeat Purchase</div><div class="row-v">${a.repeat_rate}</div></div>
+    <div class="row"><div class="row-n">New SKU Contrib.</div><div class="row-v" style="color:var(--pink)">${a.new_sku_contribution}</div></div>`;
+
+  document.getElementById('comp-chips').innerHTML=a.competitor_gaps.map(g=>
+    `<div class="chip"><div class="chip-n">${g.name}</div><div class="chip-s"><span class="b ${g.badge}">${g.label}</span></div></div>`
+  ).join('');
+}
+
+// ── IMPROVEMENT ──────────────────────────────────
+function renderImprovement(imp){
+  if(!imp)return;
+  document.getElementById('imp-total').textContent=imp.total;
+  document.getElementById('imp-sub').innerHTML=`
+    <span class="h-badge">🔧 ${imp.in_improvement} In Improvement</span>
+    <span class="h-badge">📋 ${imp.plan_stage} Plan Stage</span>
+    <span class="h-badge">✅ ${imp.closed_ytd} Closed YTD</span>`;
+  document.getElementById('imp-kpis').innerHTML=`
+    <div class="mc clickable" onclick="openDetailPanel('imp','all')"><div class="mc-ic">🎯</div><div class="mc-v">${imp.total}</div><div class="mc-l">Total Targeted</div><div class="mc-s">Tap to view all →</div></div>
+    <div class="mc gd clickable" onclick="openDetailPanel('imp','In Development')"><div class="mc-ic">🔧</div><div class="mc-v">${imp.in_improvement}</div><div class="mc-l">In Improvement</div><div class="mc-s">Tap to view →</div></div>
+    <div class="mc pk clickable" onclick="openDetailPanel('imp','Plan')"><div class="mc-ic">📋</div><div class="mc-v">${imp.plan_stage}</div><div class="mc-l">Plan Stage</div><div class="mc-s">Tap to view →</div></div>
+    <div class="mc gr clickable" onclick="openDetailPanel('imp','Closure')"><div class="mc-ic">✅</div><div class="mc-v">${imp.closed_ytd}</div><div class="mc-l">Closed YTD</div><div class="mc-s">Tap to view →</div></div>`;
+  const mx=Math.max(...imp.issues_by_type.map(i=>i.count),1);
+  document.getElementById('imp-pb').innerHTML=imp.issues_by_type.map(i=>`
+    <div class="pb-row">
+      <div class="pb-lbl">${i.label}</div>
+      <div class="pb-tr"><div class="pb-fi" style="width:${Math.round(i.count/mx*100)}%;background:${i.color}"></div></div>
+      <div class="pb-v" style="color:${i.color}">${i.count}</div>
+    </div>`).join('');
+  document.getElementById('imp-pipe').innerHTML=imp.pipeline.map(p=>`
+    <div class="row">
+      <div class="row-l"><span class="dot ${p.dot}"></span><span class="row-n">${p.stage}</span></div>
+      <div class="row-r"><div class="row-v">${p.skus} SKUs</div><div class="row-m">${p.deadline}</div></div>
+    </div>`).join('');
+  const lm={red:{bg:'var(--red)',ic:'!'},amber:{bg:'var(--gold)',ic:'!'},blue:{bg:'var(--blue)',ic:'i'}};
+  document.getElementById('imp-critical').innerHTML=imp.critical_items.map(c=>`
+    <div class="ai ${c.level}">
+      <div class="ai-ic" style="background:${lm[c.level].bg};color:#fff">${lm[c.level].ic}</div>
+      <div><div class="ai-t">${c.title}</div><div class="ai-d">${c.desc}</div></div>
+    </div>`).join('');
+}
+
+// ── CX ───────────────────────────────────────────
+function renderCX(cx){
+  if(!cx)return;
+  document.getElementById('cx-rating').textContent=cx.avg_rating;
+  document.getElementById('cx-sub').innerHTML=`
+    <span class="h-badge">💬 CSAT: ${cx.csat}</span>
+    <span class="h-badge">↩️ Return: ${cx.return_rate}</span>
+    <span class="h-badge" style="background:rgba(255,255,255,.28)">⚠️ 1-2★: ${cx.low_star}</span>`;
+  document.getElementById('cx-kpis').innerHTML=`
+    <div class="mc gr"><div class="mc-ic">⭐</div><div class="mc-v">${cx.rating_num}</div><div class="mc-l">Avg. Rating</div><div class="mc-s">Across platforms</div></div>
+    <div class="mc rd"><div class="mc-ic">😞</div><div class="mc-v">${cx.low_star}</div><div class="mc-l">1–2 Star Reviews</div><div class="mc-s">Needs action</div></div>
+    <div class="mc gd"><div class="mc-ic">😊</div><div class="mc-v">${cx.csat}</div><div class="mc-l">CSAT</div><div class="mc-s">Post-purchase</div></div>
+    <div class="mc pk"><div class="mc-ic">↩️</div><div class="mc-v">${cx.return_rate}</div><div class="mc-l">Return Rate</div><div class="mc-s">Last 30 days</div></div>`;
+  document.getElementById('cx-complaints').innerHTML=cx.complaints.map(c=>`
+    <div class="row">
+      <div class="row-n">${c.issue}</div>
+      <span class="b ${c.badge}">${c.count}</span>
+    </div>`).join('');
+  document.getElementById('cx-marketing').innerHTML=cx.marketing.map(m=>`
+    <div class="row">
+      <div class="row-n">${m.task}</div>
+      <span class="b ${m.badge}">${m.value}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+// SKU STAGE PANEL — BAU/TEMP aware
+// ════════════════════════════════════════════════
+const STAGE_LABELS=['Ideas Approved','In Development','Ready to Launch','Launched YTD'];
+const STAGE_COLORS={'Ideas Approved':'#E8960C','In Development':'#1565C0','Ready to Launch':'#1B7C3A','Launched YTD':'#B5175E'};
+const STAGE_SHORT={'Ideas Approved':'Approved','In Development':'In Dev','Ready to Launch':'Ready','Launched YTD':'Launched'};
+let skpCurrentStage='Ideas Approved';
+let skpCurrentType='BAU'; // 'BAU' or 'TEMP'
+
+function openSkuPanel(stage, type){
+  skpCurrentStage = stage;
+  skpCurrentType  = type || 'BAU';
+  document.getElementById('skuPanel').classList.add('show');
+  renderSkpTabs();
+  renderSkpBody(stage);
+}
+function closeSkuPanel(){
+  document.getElementById('skuPanel').classList.remove('show');
+}
+function renderSkpTabs(){
+  // Only show stages that have items for this type
+  const allItems = DATA?.bau?.pipeline_items || [];
+  const typeItems = allItems.filter(i => i.type === skpCurrentType);
+  const typeLabel = skpCurrentType === 'BAU' ? '🚀 BAU' : '🌸 TEMP';
+
+  document.getElementById('skpTabs').innerHTML = STAGE_LABELS.map(s => {
+    const cnt = typeItems.filter(i => i.stage === s).length;
+    const on  = s === skpCurrentStage ? 'on' : '';
+    return `<div class="skp-tab ${on}" data-stage="${STAGE_SHORT[s]}"
+      onclick="selectSkpStage('${s}',this)">${STAGE_SHORT[s]} (${cnt})</div>`;
+  }).join('');
+}
+function selectSkpStage(stage, el){
+  skpCurrentStage = stage;
+  document.querySelectorAll('.skp-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  renderSkpBody(stage);
+}
+function renderSkpBody(stage){
+  // Get pipeline items — from live raw or adapted data
+  const rawItems = (DATA?._raw?.bauPipeline?.items) || (DATA?.bau?.pipeline_items) || [];
+  const items = rawItems.filter(i => i.stage === stage && i.type === skpCurrentType);
+  const color = STAGE_COLORS[stage] || 'var(--pink)';
+
+  document.getElementById('skpTitle').textContent  = `${STAGE_SHORT[stage]} — ${skpCurrentType==='BAU'?'🚀 BAU':'🌸 TEMP'}`;
+  document.getElementById('skpCount').textContent  = `${items.length} products`;
+
+  if(!items.length){
+    document.getElementById('skpBody').innerHTML = `
+      <div class="sku-empty">
+        <div class="sku-empty-ic">📭</div>
+        <div class="sku-empty-txt">No ${skpCurrentType} SKUs in "${stage}"</div>
+      </div>`;
+    return;
+  }
+  document.getElementById('skpBody').innerHTML = items.map(item => {
+    const priColor = {'🔴 High':'var(--red)','🟠 Medium':'var(--gold)','🟡 Low':'var(--green)'}[item.priority] || 'var(--ink3)';
+    return `<div class="sku-card">
+      <div class="sku-card-main">
+        <div class="sku-card-name">${item.name}</div>
+        <div class="sku-card-meta">
+          <span>🏷️ ${item.brand||'–'}</span>
+          <span>📂 ${item.seg||item.segment||'–'}</span>
+          <span>👤 ${item.owner||'–'}</span>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <span class="b" style="background:${color}22;color:${color}">${item.type}</span>
+          <span style="font-size:10px;font-weight:700;color:${priColor}">${item.priority||''}</span>
+        </div>
+      </div>
+      <div class="sku-card-right">
+        <div class="sku-card-dl">📅 ${item.deadline||'—'}</div>
+        <div style="font-size:10px;color:var(--ink3)">Target date</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+// DETAIL PANEL — generic KPI drill-down
+// ════════════════════════════════════════════════
+
+// Stage colour map for improvement
+const IMP_STAGE_COLORS = {
+  'Plan':           {bg:'var(--gold)',    light:'var(--gold-l)',   text:'#7d5a00'},
+  'In Development': {bg:'var(--blue)',    light:'var(--blue-l)',   text:'#0d47a1'},
+  'Closure':        {bg:'var(--green)',   light:'var(--green-l)',  text:'#1b5e20'},
+  'all':            {bg:'var(--pink)',    light:'var(--pink-l)',   text:'#880e4f'},
+};
+
+function openDetailPanel(section, filter){
+  const panel  = document.getElementById('detailPanel');
+  const hdr    = document.getElementById('dpHdr');
+  const title  = document.getElementById('dpTitle');
+  const sub    = document.getElementById('dpSubtitle');
+  const body   = document.getElementById('dpBody');
+
+  panel.classList.add('show');
+
+  if(section === 'imp'){
+    renderImpDetail(filter, title, sub, body, hdr);
+  }
+}
+
+function closeDetailPanel(){
+  document.getElementById('detailPanel').classList.remove('show');
+}
+
+// ── IMPROVEMENT DETAIL ───────────────────────────
+function renderImpDetail(filter, titleEl, subEl, bodyEl, hdrEl){
+  const imp = DATA?.improvement;
+  if(!imp) return;
+
+  const col = IMP_STAGE_COLORS[filter] || IMP_STAGE_COLORS['all'];
+  hdrEl.style.background = `linear-gradient(135deg, ${col.bg}, ${col.bg}cc)`;
+
+  const filterLabel = {
+    'all':            '🎯 All Targeted SKUs',
+    'Plan':           '📋 Plan Stage',
+    'In Development': '🔧 In Improvement',
+    'Closure':        '✅ Closed YTD',
+  }[filter] || filter;
+
+  titleEl.textContent   = filterLabel;
+
+  // Filter items
+  const allItems = imp.items || buildImpItemsFromData(imp);
+  const items = filter === 'all'
+    ? allItems
+    : allItems.filter(i => i.stage === filter);
+
+  subEl.textContent = `${items.length} SKUs`;
+
+  if(!items.length){
+    bodyEl.innerHTML = `
+      <div style="text-align:center;padding:50px 20px;color:var(--ink3)">
+        <div style="font-size:40px;margin-bottom:12px">📭</div>
+        <div style="font-size:14px;font-weight:700">No items in this stage</div>
+      </div>`;
+    return;
+  }
+
+  // Priority summary row
+  const high   = items.filter(i=>i.priority==='🔴 High').length;
+  const medium = items.filter(i=>i.priority==='🟠 Medium').length;
+  const low    = items.filter(i=>i.priority==='🟡 Low').length;
+
+  bodyEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px">
+      <div style="background:var(--red-l);border-radius:12px;padding:11px;text-align:center;border:1px solid #EF9A9A">
+        <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:var(--red)">${high}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;margin-top:2px">🔴 High</div>
+      </div>
+      <div style="background:var(--gold-l);border-radius:12px;padding:11px;text-align:center;border:1px solid #FFE082">
+        <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:var(--gold)">${medium}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-top:2px">🟠 Medium</div>
+      </div>
+      <div style="background:var(--green-l);border-radius:12px;padding:11px;text-align:center;border:1px solid #A5D6A7">
+        <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:var(--green)">${low}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;margin-top:2px">🟡 Low</div>
+      </div>
+    </div>
+    ${items.sort((a,b)=>{
+      const p={'🔴 High':0,'🟠 Medium':1,'🟡 Low':2};
+      return (p[a.priority]??3)-(p[b.priority]??3);
+    }).map(item=>{
+      const priCol = {'🔴 High':['var(--red)','var(--red-l)','#EF9A9A'],'🟠 Medium':['var(--gold)','var(--gold-l)','#FFE082'],'🟡 Low':['var(--green)','var(--green-l)','#A5D6A7']}[item.priority]||['var(--ink3)','var(--bg)','var(--bdr)'];
+      const stgCol = {'Plan':'var(--gold)','In Development':'var(--blue)','Closure':'var(--green)'}[item.stage]||'var(--ink3)';
+      const pct = item.pct || 0;
+      return `<div class="det-card" style="border-left:4px solid ${priCol[0]}">
+        <div class="det-card-top">
+          <div class="det-card-title">${item.sku}</div>
+          <span class="b" style="background:${priCol[1]};color:${priCol[0]};border:1px solid ${priCol[2]}">${item.priority}</span>
+        </div>
+        <div class="det-card-meta">
+          <span class="b b-gray">📦 ${item.platform||'–'}</span>
+          <span class="b" style="background:#f0f4ff;color:${stgCol}">${item.stage}</span>
+          ${item.deadline?`<span class="b b-gray">📅 ${item.deadline}</span>`:''}
+        </div>
+        <div style="font-size:12px;color:var(--ink2);font-weight:600;margin-top:6px">${item.issue}</div>
+        ${pct>0?`<div class="det-progress">
+          <div class="det-prog-bar"><div class="det-prog-fill" style="width:${pct}%;background:${stgCol}"></div></div>
+          <div class="det-prog-row"><span>Progress</span><span style="color:${stgCol};font-weight:800">${pct}%</span></div>
+        </div>`:''}
+        ${item.brief?`<div class="det-card-desc"><strong>Brief:</strong> ${item.brief}${item.detail?`<br><strong>Detail:</strong> ${item.detail}`:''}</div>`:''}
+      </div>`;
+    }).join('')}`;
+}
+
+// Build items array from flat improvement data (for demo)
+function buildImpItemsFromData(imp){
+  // Richer demo items based on existing data
+  return [
+    {sku:'Sy-MediumKite-Light-4',issue:'Packaging tears during shipping — 12% return rate',stage:'In Development',pct:60,deadline:'2026-03-31',platform:'Amazon',priority:'🔴 High',brief:'Reinforce inner packaging with bubble wrap insert',detail:'Double-layer corrugated insert + fragile sticker. Vendor: Pakka India.'},
+    {sku:'SY-AVENGERS-71',issue:'Colors fading reported in 8% reviews',stage:'Plan',pct:15,deadline:'2026-04-15',platform:'Flipkart',priority:'🔴 High',brief:'Switch to UV-resistant ink printing vendor'},
+    {sku:'Sy-PaperKandil-1',issue:'Assembly instructions unclear',stage:'Closure',pct:90,deadline:'2026-03-15',platform:'All',priority:'🟠 Medium',brief:'New QR code instruction card added to packaging'},
+    {sku:'Sy-TriHairclip-6',issue:'Clip mechanism breaks after 3-4 uses',stage:'In Development',pct:45,deadline:'2026-04-30',platform:'Amazon, Flipkart',priority:'🟠 Medium',brief:'Upgrade clip material from ABS to nylon'},
+    {sku:'Sy-RectangularStand-01',issue:'Stand wobbles on uneven surfaces',stage:'Plan',pct:10,deadline:'2026-05-15',platform:'Amazon',priority:'🟡 Low',brief:'Add rubber feet to base of stand'},
+    {sku:'SY-GlitterSet-4',issue:'Glitter shedding excessively',stage:'Plan',pct:5,deadline:'2026-05-01',platform:'Nykaa',priority:'🔴 High',brief:'Change glitter adhesive formula'},
+    {sku:'Sy-PastelBday-57',issue:'Banner print misaligned in 15% units',stage:'In Development',pct:70,deadline:'2026-04-10',platform:'Amazon',priority:'🟠 Medium',brief:'QC checkpoint added at vendor'},
+    {sku:'SY-WelcomeDoor-33',issue:'Colour not matching product images',stage:'Closure',pct:100,deadline:'2026-03-01',platform:'Flipkart',priority:'🟡 Low',brief:'New photography done. Listing updated.'},
+    {sku:'Sy-CartoonKite-4',issue:'String tangles in packaging',stage:'Plan',pct:0,deadline:'2026-06-01',platform:'Amazon',priority:'🟠 Medium',brief:'Pre-wound string spool to be added'},
+    {sku:'SY-DeepakHanging-10',issue:'Metal hooks rusting within 1 month',stage:'In Development',pct:35,deadline:'2026-04-20',platform:'All',priority:'🔴 High',brief:'Switch to stainless steel hooks (+₹2/unit)'},
+    {sku:'SY-PEPPAPIG',issue:'Age label missing on box',stage:'Closure',pct:100,deadline:'2026-02-15',platform:'All',priority:'🟡 Low',brief:'Label redesigned and updated'},
+    {sku:'Sy-IndiaWristBand-5',issue:'Elastic too tight — customer complaints',stage:'Plan',pct:0,deadline:'2026-05-30',platform:'Amazon',priority:'🟠 Medium',brief:'Source wider elastic band — 3 vendors shortlisted'},
+  ];
+}
+async function loadData(){
+  setSt('ld','Connecting…');
+  document.getElementById('refreshBtn').classList.add('spin');
+  if(!SHEET_URL){
+    await sleep(600);
+    renderAll(DEMO);
+    setSt('warn','Demo data · Tap ⚙️ to setup Google Sheet');
+  } else {
+    try{
+      const r=await fetch(SHEET_URL+'?t='+Date.now());
+      if(!r.ok)throw new Error();
+      const d=await r.json();
+      if(d.error)throw new Error(d.error);
+      renderAll(d);
+      setSt('ok','Live data · Updated '+(d.meta?.updated||new Date().toLocaleTimeString()));
+    }catch(e){
+      renderAll(DEMO);
+      setSt('err','Sheet error · Showing demo data');
+    }
+  }
+  document.getElementById('refreshBtn').classList.remove('spin');
+}
+function doRefresh(){loadData()}
+function setSt(type,msg){
+  const dot=document.getElementById('sDot');
+  const txt=document.getElementById('sTxt');
+  dot.className='s-dot';
+  if(type==='ld')dot.classList.add('ld');
+  else if(type==='err')dot.classList.add('err');
+  else if(type==='warn')dot.style.background='var(--gold)';
+  else dot.style.background='var(--green)';
+  txt.textContent=msg;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// ════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════
+const PAGES={bau:'pg-bau',temp:'pg-temp',analysis:'pg-analysis',improve:'pg-improve',cx:'pg-cx'};
+const TAB_IDX={bau:0,temp:1,analysis:2,improve:3,cx:4};
+
+function showPage(key,niEl){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  const pg=document.getElementById(PAGES[key]);
+  if(pg)pg.classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  const ni=document.getElementById('ni-'+key);
+  if(ni)ni.classList.add('on');
+  // sync tab
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  const idx=TAB_IDX[key];
+  const tabs=document.querySelectorAll('.tab');
+  if(idx!==undefined&&tabs[idx])tabs[idx].classList.add('on');
+  document.getElementById('scroll').scrollTop=0;
+  closeSkuPanel();
+  closeDetailPanel();
+}
+
+function showTab(key,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  const pg=document.getElementById(PAGES[key]);
+  if(pg)pg.classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  const ni=document.getElementById('ni-'+key);
+  if(ni)ni.classList.add('on');
+  document.getElementById('scroll').scrollTop=0;
+  closeSkuPanel();
+  closeDetailPanel();
+}
+
+// ════════════════════════════════════════════════
+// PROFILE PANEL
+// ════════════════════════════════════════════════
+function openUserModal(){
+  // Sheet connection — show correct view
+  const connected = !!SHEET_URL;
+  const connView  = document.getElementById('sheetConnectedView');
+  const inpView   = document.getElementById('sheetInputView');
+  if(connView) connView.style.display = connected ? 'block' : 'none';
+  if(inpView)  inpView.style.display  = connected ? 'none'  : 'block';
+  const inp = document.getElementById('sheetUrlInput');
+  if(inp) inp.value = '';  // never pre-fill — URL stays hidden
+  // User list
+  renderUserList();
+  // Admin section
+  const sess   = getSess();
+  const usrSec = document.getElementById('usersSection');
+  if(usrSec) usrSec.style.display = sess?.role==='Admin' ? 'block' : 'none';
+  // Avatar info
+  if(sess){
+    const ini=sess.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    setEl('ppAv',ini); setEl('ppName',sess.name);
+    setEl('ppRole',sess.role); setEl('ppEmail',sess.email);
+  }
+  const p=document.getElementById('profilePanel');
+  p.style.display='flex';
+  requestAnimationFrame(()=>p.style.transform='translateX(0)');
+}
+
+function showSheetInput(){
+  // Show input form for updating connection
+  const connView = document.getElementById('sheetConnectedView');
+  const inpView  = document.getElementById('sheetInputView');
+  if(connView) connView.style.display = 'none';
+  if(inpView)  inpView.style.display  = 'block';
+  const inp = document.getElementById('sheetUrlInput');
+  if(inp){ inp.value=''; inp.focus(); }
+}
+function closeProfilePanel(){
+  const p=document.getElementById('profilePanel');
+  p.style.transform='translateX(100%)';
+  setTimeout(()=>p.style.display='none',300);
+}
+// Keep old name working
+function closeUserModal(){ closeProfilePanel(); }
+function openSettings(){ openUserModal(); }
+function closeSettings(){ closeProfilePanel(); }
+
+function setEl(id,val){ const e=document.getElementById(id); if(e)e.textContent=val; }
+
+// ── Change Password ───────────────────────────
+function changePassword(){
+  const sess = getSess();
+  if(!sess){ showMsg('pwMsg','Not logged in.','red'); return; }
+  const cur = (document.getElementById('pwCurrent')?.value || '').trim();
+  const nw  = (document.getElementById('pwNew')?.value     || '').trim();
+  const cf  = (document.getElementById('pwConfirm')?.value || '').trim();
+  if(!cur||!nw||!cf){ showMsg('pwMsg','Please fill all fields.','red'); return; }
+  const users = getStoredUsers();
+  const idx   = users.findIndex(u => u.email === sess.email);
+  if(idx===-1 || users[idx].pass !== cur){ showMsg('pwMsg','Current password is incorrect.','red'); return; }
+  if(nw.length < 6){ showMsg('pwMsg','New password must be at least 6 characters.','red'); return; }
+  if(nw !== cf){ showMsg('pwMsg','Passwords do not match.','red'); return; }
+  users[idx].pass = nw;
+  saveStoredUsers(users);
+  sess.pass = nw; setSess(sess);
+  showMsg('pwMsg','Password updated successfully!','green');
+  ['pwCurrent','pwNew','pwConfirm'].forEach(id => { const e=document.getElementById(id); if(e)e.value=''; });
+}
+
+// ── User Management ───────────────────────────
+const USER_KEY='sy_users';
+
+function getStoredUsers(){
+  try{
+    const s = localStorage.getItem(USER_KEY);
+    if(s){
+      const parsed = JSON.parse(s);
+      // Guard: must be an array
+      if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e){ console.warn('getStoredUsers error:', e); }
+  // Fallback: initialise from built-in users and save
+  const base = USERS.map(u => ({...u}));
+  try{ localStorage.setItem(USER_KEY, JSON.stringify(base)); } catch(e){}
+  return base;
+}
+
+function saveStoredUsers(list){
+  if(!Array.isArray(list)) return;
+  try{ localStorage.setItem(USER_KEY, JSON.stringify(list)); } catch(e){}
+}
+
+function renderUserList(){
+  const el = document.getElementById('userListDiv');
+  if(!el) return;
+  const sess  = getSess();
+  const users = getStoredUsers();
+  if(!users || !users.length){ el.innerHTML='<div style="font-size:12px;color:var(--ink3);padding:8px 0">No users found.</div>'; return; }
+  el.innerHTML = users.map((u,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;
+      border-bottom:${i===users.length-1?'none':'1px solid var(--bdr)'}">
+      <div style="width:32px;height:32px;background:var(--pink-l);border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:800;color:var(--pink);flex-shrink:0">
+        ${(u.name||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px">
+          ${u.name||'–'}
+          ${u.email===sess?.email?'<span style="font-size:10px;background:var(--green-l);color:var(--green);padding:1px 6px;border-radius:8px;font-weight:700">You</span>':''}
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.email||'–'} · ${u.role||'–'}</div>
+      </div>
+      ${u.email!==sess?.email?`<button onclick="removeUser('${u.email}')"
+        style="background:var(--red-l);color:var(--red);border:1px solid #EF9A9A;border-radius:7px;
+        padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
+        Remove</button>`:''}
+    </div>`).join('');
+}
+
+function toggleAddUser(){
+  const f=document.getElementById('addUserForm');
+  if(f) f.style.display=f.style.display==='none'?'block':'none';
+}
+
+function addNewUser(){
+  const name  = (document.getElementById('nuName')?.value  || '').trim();
+  const email = (document.getElementById('nuEmail')?.value || '').trim().toLowerCase();
+  const pass  = (document.getElementById('nuPass')?.value  || '').trim();
+  const role  = document.getElementById('nuRole')?.value   || 'Viewer';
+  if(!name)  { showMsg('nuMsg','Name is required.','red');  return; }
+  if(!email) { showMsg('nuMsg','Email is required.','red'); return; }
+  if(!pass)  { showMsg('nuMsg','Password is required.','red'); return; }
+  if(pass.length < 6){ showMsg('nuMsg','Password must be at least 6 characters.','red'); return; }
+  const users = getStoredUsers();
+  if(users.find(u => u.email === email)){ showMsg('nuMsg','A user with this email already exists.','red'); return; }
+  users.push({ name, email, pass, role });
+  saveStoredUsers(users);
+  showMsg('nuMsg','User added successfully!','green');
+  ['nuName','nuEmail','nuPass'].forEach(id => { const e=document.getElementById(id); if(e)e.value=''; });
+  renderUserList();
+  setTimeout(()=>{ const f=document.getElementById('addUserForm'); if(f)f.style.display='none'; }, 900);
+}
+
+function removeUser(email){
+  if(!confirm('Remove user "' + email + '"?\nThis action cannot be undone.')) return;
+  const users = getStoredUsers().filter(u => u.email !== email);
+  saveStoredUsers(users);
+  renderUserList();
+}
+
+// ── Sheet URL ─────────────────────────────────
+function saveSheetUrl(){
+  const url=(document.getElementById('sheetUrlInput')?.value||'').trim();
+  if(url && !url.startsWith('https://script.google.com')){
+    showMsg('sheetConnStatus','Please enter a valid Google Apps Script URL.','red'); return;
+  }
+  SHEET_URL=url;
+  url ? localStorage.setItem(SK,url) : localStorage.removeItem(SK);
+  if(url){
+    // Show connected state, hide input
+    const connView=document.getElementById('sheetConnectedView');
+    const inpView =document.getElementById('sheetInputView');
+    if(connView) connView.style.display='block';
+    if(inpView)  inpView.style.display='none';
+    showMsg('sheetConnStatus','✅ Connected — loading live data…','green');
+    setTimeout(()=>{ closeProfilePanel(); loadData(); }, 800);
+  } else {
+    showMsg('sheetConnStatus','Disconnected.','gray');
+  }
+}
+
+function clearSheetUrl(){
+  SHEET_URL=''; localStorage.removeItem(SK);
+  const connView=document.getElementById('sheetConnectedView');
+  const inpView =document.getElementById('sheetInputView');
+  if(connView) connView.style.display='none';
+  if(inpView)  inpView.style.display='block';
+  const inp=document.getElementById('sheetUrlInput');
+  if(inp) inp.value='';
+  showMsg('sheetConnStatus','Sheet disconnected. Using demo data.','gray');
+  loadData();
+}
+// legacy alias
+function saveSheet(){ saveSheetUrl(); }
+
+// ── Helpers ───────────────────────────────────
+function showMsg(id,msg,type){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=type==='green'?'var(--green)':type==='red'?'var(--red)':'var(--ink3)';
+  if(type==='green') setTimeout(()=>{if(el.textContent===msg)el.textContent='';},3000);
+}
+
+// Fix login to check both built-in and stored users
+function doLogin(){
+  const em = document.getElementById('lEmail').value.trim().toLowerCase();
+  const pw = document.getElementById('lPass').value;
+  // Merge built-in + stored, stored takes precedence for same email
+  const stored = getStoredUsers();
+  const allUsers = [
+    ...stored,
+    ...USERS.filter(b => !stored.find(s => s.email === b.email))
+  ];
+  const u = allUsers.find(x => x.email === em && x.pass === pw);
+  if(!u){ document.getElementById('lErr').textContent = 'Invalid email or password.'; return; }
+  setSess(u); startApp(u);
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  const sess=getSess();
+  if(sess){
+    document.getElementById('loginWrap').style.display='none';
+    setTimeout(()=>{
+      document.getElementById('loader').classList.add('off');
+      startApp(sess);
+    },1000);
+  } else {
+    document.getElementById('loader').classList.add('off');
+  }
+});
+</script>
+</body>
+</html>
